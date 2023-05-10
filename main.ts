@@ -1,4 +1,4 @@
-let mySprite = sprites.create(img`
+let _player = sprites.create(img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
