@@ -1,3 +1,4 @@
+let current_weapon = 0
 let _player = sprites.create(img`
     . . . . . . . . . . . . . . . . 
     . . . . . . . . . . . . . . . . 
