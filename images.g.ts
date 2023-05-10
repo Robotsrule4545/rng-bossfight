@@ -152,11 +152,11 @@ b c c c c c c c c c c c c c c c c c c b
 `;
             case "image4":
             case "Hpipe":return img`
-. b b b b b b b b b b b b b b b b b . . 
-b d d d d c d d c c c c c c c c c c b b 
-b c c c c c c c c c c c c c c c c c c b 
-b c c c c c c c c c c c c c c c c c c b 
-. b b b b b b b b b b b b b b b b b b . 
+. b b b b b b b b b b b b b b b b b b b b b b b b b b b . . 
+b d d d d d d d c c c d d d c c c c c c c c c c c c c c b b 
+b c c c c c c c c c c c c c c c c c c c c c c c c c c c c b 
+b c c c c c c c c c c c c c c c c c c c c c c c c c c c c b 
+. b b b b b b b b b b b b b b b b b b b b b b b b b b b b . 
 `;
         }
         return null;
