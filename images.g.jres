@@ -19,12 +19,25 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "player_sword1"
     },
-    "anim1": {
-        "namespace": "myAnimations",
-        "id": "anim1",
-        "mimeType": "application/mkcd-animation",
-        "data": "ZjQwMTEwMDAxNDAwMDIwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwYjAwMDAwMDAwMGVlZWUwMGIwMDAwMDAwMDAwZWUwMDBiMDAwMDAwMDAwMGVlMDAwYjAwMDAwMDAwMGVlZWUwMGIwMDAwMDAwMDAyODIyMjIyNDA0MDAwMDQwMjgwMDAwZTIwMDAwMDA0MDI4MjIyMmUyMDAwMDAwMDQwODgwMDAwMDAwMDAwMDA0MDg4MDAwMDAwMDAwMDA0NDg4ODgwMDAwMDAwMDAwMDAwNzY3MDAwMDAwMDAwMDAwMDc2NzAwMDAwMDAwMDAwMDA3NjcwMDAwMDAwMDAwMDAwNzA3MDYwMDAwMDAwMDAwNzc2NzA2MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDBiMDAwMDAwMDAwZWVlZTAwYjAwMDAwMDAwMDBlZTAwMGIwMDAwMDAwMDAwZWUwMDBiMDAwMDAwMDAwZWVlZTAwYjAwMDAwMDAwMDI4MjIyMjI0MDQwMDAwNDAyODAwMDBlMjAwMDAwMDQwMjgyMjIyZTIwMDAwMDAwNDA4ODAwMDAwMDAwMDAwMDQwODgwMDAwMDAwMDAwMDQ0ODg4ODAwMDAwMDAwMDAwMDA3NjcwMDAwMDAwMDAwNzAwMDY3MDAwMDAwMDAwMDA3NzA2MDAwMDAwMDAwNzAwMDY3NjAwMDAwMDAwMDcwNzc2MDY2MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=",
-        "displayName": "player_swordIDLE"
+    "image7": {
+        "data": "hwQQABAAAAAiAgAAAAAgIiIiAAAAACIiIiICAAAgIiIgIiIAACIiAgAiIgIgIiIAACAiIiIiAgAAACIiIiIAAAAAICIiAgAAAAAgIiICAAAAACIiIiIAAAAgIiIiIgIAACIiAiAiIgAgIiIAACIiAiIiAgAAICIiIiIAAAAAIiIiAgAAAAAgIg==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "undefined"
+    },
+    "image5": {
+        "data": "hwQIAA8AAADAAAAAAAAAALwMAAAAwMwM/MvMzMzMuwv8v7u7u7u7C/y/u7u7u7sL/MvMzMzMuwu8DAAAAMDMDMAAAAAAAAAA",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "Vpipe"
+    },
+    "image6": {
+        "data": "hwQUAA8AAAAAAAAAALC7AAAAAAAA28wLAAAAAADbzAsAAAAAANvMCwAAAAAA28wLAKoAAADLzAsAoKAAANvMCwAACgoK28wLAACgoKDLzAsAAKCgoMvMCwAAoKCgy8wLAACgoADLzAsAAAoKAMvMCwAACgAAy8wLAKAAAADLzAsAAAAAAMvMCwAAAAAAy8wLAAAAAADLzAsAAAAAALDMCwAAAAAAsLsA",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "Springboard"
+    },
+    "image4": {
+        "data": "hwQUAAUAAACwuwAA28wLANvMCwDbzAsA28wLAMvMCwDbzAsA28wLAMvMCwDLzAsAy8wLAMvMCwDLzAsAy8wLAMvMCwDLzAsAy8wLAMvMCwCwzAsAsLsAAA==",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "Hpipe"
     },
     "*": {
         "mimeType": "image/x-mkcd-f4",
