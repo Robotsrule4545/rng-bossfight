@@ -83,6 +83,7 @@ game.onUpdateInterval(500, function () {
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             `, SpriteKind.Enemy)
+        currentEnemy.setPosition(150, randint(80, 120))
     } else if (enemyRNG >= 40 && enemyRNG <= 100) {
         currentEnemy = sprites.create(img`
             . . . . . . . . . . . . . . . . 
@@ -102,6 +103,7 @@ game.onUpdateInterval(500, function () {
             . . . . . . . . . . . . . . . . 
             . . . . . . . . . . . . . . . . 
             `, SpriteKind.Enemy)
+        currentEnemy.setPosition(150, randint(40, 120))
     }
     enemystatusbar = statusbars.create(10, 2, StatusBarKind.Health)
     enemystatusbar.attachToSprite(currentEnemy)
