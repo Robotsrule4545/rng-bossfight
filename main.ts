@@ -36,23 +36,16 @@ game.onUpdateInterval(500, function () {
     enemyRNG = randint(0, 100)
     if (enemyRNG < 15) {
         currentEnemy = sprites.create(img`
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
+            . . f f f f . . 
+            . f 1 1 1 1 f . 
+            f 9 9 1 1 1 1 f 
+            f 1 9 1 1 1 1 f 
+            f 8 9 1 1 1 1 f 
+            f 9 9 1 1 1 1 f 
+            . f 1 1 1 1 f . 
+            . . f f f f . . 
             `, SpriteKind.Enemy)
+        currentEnemy.setPosition(160, randint(40, 120))
     } else if (enemyRNG >= 40 && enemyRNG <= 100) {
         currentEnemy = sprites.create(img`
             . . . . . . . . . . . . . . . . 
@@ -92,6 +85,7 @@ game.onUpdateInterval(500, function () {
             . . . . . . . . . . . . . . . . 
             `, SpriteKind.Enemy)
     }
+    currentEnemy.setFlag(SpriteFlag.AutoDestroy, true)
 })
 game.onUpdateInterval(300, function () {
     platformRNG = randint(0, 100)
