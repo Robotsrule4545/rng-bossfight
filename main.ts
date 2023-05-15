@@ -45,7 +45,7 @@ game.onUpdateInterval(500, function () {
             . f 1 1 1 1 f . 
             . . f f f f . . 
             `, SpriteKind.Enemy)
-        currentEnemy.setPosition(160, randint(40, 120))
+        currentEnemy.setPosition(150, randint(40, 120))
     } else if (enemyRNG >= 40 && enemyRNG <= 100) {
         currentEnemy = sprites.create(img`
             . . . . . . . . . . . . . . . . 
