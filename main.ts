@@ -20,11 +20,12 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     sprites.destroy(otherSprite, effects.fire, 500)
     info.changeScoreBy(1)
 })
-let currentEnemy: Sprite = null
 let enemyRNG = 0
 let currentPlatform: Sprite = null
 let platformRNG = 0
 let bullet: Sprite = null
+let currentEnemy: Sprite = null
+let enemylaser: Sprite = null
 let cooldown = 0
 let _player: Sprite = null
 info.setLife(3)
@@ -164,6 +165,21 @@ game.onUpdateInterval(5000, function () {
 })
 game.onUpdateInterval(2000, function () {
     cooldown = 0
+})
+game.onUpdateInterval(2000, function () {
+    for (let index = 0; index < 50; index++) {
+        enemylaser = sprites.createProjectileFromSprite(img`
+            . 3 3 3 3 3 3 3 3 3 3 3 
+            3 3 3 3 3 3 3 3 3 3 3 3 
+            3 3 3 3 3 3 3 3 3 3 3 3 
+            1 1 1 1 1 1 1 1 1 1 1 1 
+            1 1 1 1 1 1 1 1 1 1 1 1 
+            3 3 3 3 3 3 3 3 3 3 3 3 
+            3 3 3 3 3 3 3 3 3 3 3 3 
+            . 3 3 3 3 3 3 3 3 3 3 3 
+            `, currentEnemy, randint(-50, -200), 0)
+        enemylaser.setFlag(SpriteFlag.AutoDestroy, true)
+    }
 })
 game.onUpdateInterval(1500, function () {
     for (let index = 0; index < 8; index++) {
