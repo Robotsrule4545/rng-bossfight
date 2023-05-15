@@ -163,7 +163,7 @@ game.onUpdateInterval(2000, function () {
     cooldown = 0
 })
 game.onUpdateInterval(1500, function () {
-    for (let index = 0; index < 16; index++) {
+    for (let index = 0; index < 8; index++) {
         bullet = sprites.createProjectileFromSprite(img`
             1 1 1 1 1 1 
             1 2 2 2 2 1 
