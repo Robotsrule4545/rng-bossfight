@@ -18,6 +18,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Superplatform, function (sprite,
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     sprites.destroy(sprite, effects.fire, 500)
     sprites.destroy(otherSprite, effects.fire, 500)
+    info.changeScoreBy(1)
 })
 let currentEnemy: Sprite = null
 let enemyRNG = 0
@@ -26,7 +27,9 @@ let platformRNG = 0
 let bullet: Sprite = null
 let cooldown = 0
 let _player: Sprite = null
+info.setLife(3)
 let currentenemies = 0
+info.setScore(0)
 _player = sprites.create(assets.image`player_gun1`, SpriteKind.Player)
 controller.moveSprite(_player, 60, 0)
 let current_weapon = 0
