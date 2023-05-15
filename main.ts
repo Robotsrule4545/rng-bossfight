@@ -17,13 +17,14 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Superplatform, function (sprite,
     sprite.setPosition(otherSprite.x, otherSprite.y - 45)
     sprites.destroy(otherSprite)
 })
+let currentPlatform: Sprite = null
+let platformRNG = 0
 let enemystatusbar: StatusBarSprite = null
 let currentEnemy: Sprite = null
 let enemyRNG = 0
-let currentPlatform: Sprite = null
-let platformRNG = 0
 let cooldown = 0
 let _player: Sprite = null
+let currentenemies = 0
 _player = sprites.create(assets.image`player_gun1`, SpriteKind.Player)
 controller.moveSprite(_player, 60, 0)
 let current_weapon = 0
@@ -32,6 +33,56 @@ _player.setStayInScreen(true)
 scene.setBackgroundColor(0)
 game.onUpdateInterval(2000, function () {
     cooldown = 0
+})
+game.onUpdateInterval(1000, function () {
+    if (currentenemies <= 5) {
+        enemyRNG = randint(0, 100)
+        if (enemyRNG < 15) {
+            currentEnemy = sprites.create(img`
+                . . f f f f . . 
+                . f 1 1 1 1 f . 
+                f 9 9 1 1 1 1 f 
+                f 1 9 1 1 1 1 f 
+                f 8 9 1 1 1 1 f 
+                f 9 9 1 1 1 1 f 
+                . f 1 1 1 1 f . 
+                . . f f f f . . 
+                `, SpriteKind.Enemy)
+            currentEnemy.setPosition(150, randint(40, 120))
+        } else if (enemyRNG >= 40 && enemyRNG <= 100) {
+            currentEnemy = sprites.create(img`
+                . . f f f f . . 
+                . f 1 1 1 1 f . 
+                f 3 3 1 1 1 1 f 
+                f 1 3 1 1 1 1 f 
+                f a 3 1 1 1 1 f 
+                f 3 3 1 1 1 1 f 
+                . f 1 1 1 1 f . 
+                . . f f f f . . 
+                `, SpriteKind.Enemy)
+            currentEnemy.setPosition(150, randint(80, 120))
+        } else if (enemyRNG >= 40 && enemyRNG <= 100) {
+            currentEnemy = sprites.create(img`
+                . . f f f f . . 
+                . f 1 1 1 1 f . 
+                f 4 4 1 1 1 1 f 
+                f 1 4 1 1 1 1 f 
+                f 2 4 1 1 1 1 f 
+                f 4 4 1 1 1 1 f 
+                . f 1 1 1 1 f . 
+                . . f f f f . . 
+                `, SpriteKind.Enemy)
+            currentEnemy.setPosition(150, randint(40, 120))
+        }
+        enemystatusbar = statusbars.create(10, 2, StatusBarKind.Health)
+        enemystatusbar.attachToSprite(currentEnemy)
+        currentEnemy.setFlag(SpriteFlag.AutoDestroy, true)
+        currentenemies += 1
+    }
+})
+game.onUpdateInterval(6000, function () {
+    sprites.destroy(currentEnemy)
+    currentenemies += -1
 })
 game.onUpdateInterval(500, function () {
     platformRNG = randint(0, 100)
@@ -49,63 +100,4 @@ game.onUpdateInterval(500, function () {
     }
     currentPlatform.setVelocity(-50, 0)
     currentPlatform.setFlag(SpriteFlag.AutoDestroy, true)
-})
-game.onUpdateInterval(500, function () {
-    enemyRNG = randint(0, 100)
-    if (enemyRNG < 15) {
-        currentEnemy = sprites.create(img`
-            . . f f f f . . 
-            . f 1 1 1 1 f . 
-            f 9 9 1 1 1 1 f 
-            f 1 9 1 1 1 1 f 
-            f 8 9 1 1 1 1 f 
-            f 9 9 1 1 1 1 f 
-            . f 1 1 1 1 f . 
-            . . f f f f . . 
-            `, SpriteKind.Enemy)
-        currentEnemy.setPosition(150, randint(40, 120))
-    } else if (enemyRNG >= 40 && enemyRNG <= 100) {
-        currentEnemy = sprites.create(img`
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            `, SpriteKind.Enemy)
-        currentEnemy.setPosition(150, randint(80, 120))
-    } else if (enemyRNG >= 40 && enemyRNG <= 100) {
-        currentEnemy = sprites.create(img`
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            . . . . . . . . . . . . . . . . 
-            `, SpriteKind.Enemy)
-        currentEnemy.setPosition(150, randint(40, 120))
-    }
-    enemystatusbar = statusbars.create(10, 2, StatusBarKind.Health)
-    enemystatusbar.attachToSprite(currentEnemy)
-    currentEnemy.setFlag(SpriteFlag.AutoDestroy, true)
 })
