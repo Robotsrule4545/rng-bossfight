@@ -1,7 +1,18 @@
 namespace SpriteKind {
     export const Platform = SpriteKind.create()
     export const Superplatform = SpriteKind.create()
+    export const enemyProjectile = SpriteKind.create()
 }
+sprites.onOverlap(SpriteKind.enemyProjectile, SpriteKind.Player, function (sprite, otherSprite) {
+    sprites.destroy(sprite, effects.ashes, 500)
+})
+controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
+    if (current_weapon == 1) {
+        current_weapon = 0
+    } else if (current_weapon == 0) {
+        current_weapon = 1
+    }
+})
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (cooldown == 0) {
         _player.vy = -50
@@ -26,14 +37,16 @@ let platformRNG = 0
 let bullet: Sprite = null
 let currentEnemy: Sprite = null
 let enemylaser: Sprite = null
+let initenemies = 0
 let cooldown = 0
+let current_weapon = 0
 let _player: Sprite = null
 info.setLife(3)
 let currentenemies = 0
 info.setScore(0)
 _player = sprites.create(assets.image`player_gun1`, SpriteKind.Player)
 controller.moveSprite(_player, 60, 0)
-let current_weapon = 0
+current_weapon = 0
 _player.ay = 50
 _player.setStayInScreen(true)
 scene.setBackgroundColor(15)
@@ -159,6 +172,13 @@ scene.setBackgroundImage(img`
     ................................................................................................................................................................
     ................................................................................................................................................................
     `)
+game.onUpdate(function () {
+    if (current_weapon == 1) {
+        _player.setImage(assets.image`player_sword`)
+    } else if (current_weapon == 0) {
+        _player.setImage(assets.image`player_gun1`)
+    }
+})
 game.onUpdateInterval(5000, function () {
     sprites.destroyAllSpritesOfKind(SpriteKind.Enemy)
     currentenemies = 0
@@ -166,29 +186,57 @@ game.onUpdateInterval(5000, function () {
 game.onUpdateInterval(2000, function () {
     cooldown = 0
 })
-game.onUpdateInterval(2000, function () {
-    for (let index = 0; index < 50; index++) {
-        enemylaser = sprites.createProjectileFromSprite(img`
-            . 3 3 3 3 3 3 3 3 3 3 3 
-            3 3 3 3 3 3 3 3 3 3 3 3 
-            3 3 3 3 3 3 3 3 3 3 3 3 
-            1 1 1 1 1 1 1 1 1 1 1 1 
-            1 1 1 1 1 1 1 1 1 1 1 1 
-            3 3 3 3 3 3 3 3 3 3 3 3 
-            3 3 3 3 3 3 3 3 3 3 3 3 
-            . 3 3 3 3 3 3 3 3 3 3 3 
-            `, currentEnemy, randint(-50, -200), 0)
-        enemylaser.setFlag(SpriteFlag.AutoDestroy, true)
+game.onUpdateInterval(1000, function () {
+    if (0 < initenemies) {
+        for (let index = 0; index < 5; index++) {
+            enemylaser = sprites.create(img`
+                3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+                1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+                3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                `, SpriteKind.enemyProjectile)
+            enemylaser.setPosition(currentEnemy.x, currentEnemy.y)
+            enemylaser.setVelocity(randint(-100, -150), 0)
+            enemylaser.setFlag(SpriteFlag.AutoDestroy, true)
+        }
     }
 })
 game.onUpdateInterval(1500, function () {
-    for (let index = 0; index < 8; index++) {
-        bullet = sprites.createProjectileFromSprite(img`
-            1 1 1 1 1 1 
-            1 2 2 2 2 1 
-            1 1 1 1 1 1 
-            `, _player, randint(50, 80), randint(-15, 15))
-        bullet.setFlag(SpriteFlag.AutoDestroy, true)
+    if (current_weapon == 1) {
+        for (let index = 0; index < 3; index++) {
+            bullet = sprites.createProjectileFromSprite(img`
+                . 9 . . . . . . . 
+                . 9 9 . . . . . . 
+                . . 9 9 9 . . . . 
+                . . . . 9 9 . . . 
+                . . . . 9 9 9 . . 
+                . . . . . 9 9 . . 
+                . . . . . 9 9 . . 
+                . . . . . 9 9 . . 
+                . . . . . . 9 9 . 
+                . . . . . . 9 9 9 
+                . . . . . . 9 9 . 
+                . . . . . 9 9 . . 
+                . . . . 9 9 9 . . 
+                . . . . 9 9 . . . 
+                . . 9 9 9 . . . . 
+                . 9 9 . . . . . . 
+                `, _player, randint(100, 500), 0)
+            bullet.setFlag(SpriteFlag.AutoDestroy, true)
+        }
+    } else if (current_weapon == 0) {
+        for (let index = 0; index < 8; index++) {
+            bullet = sprites.createProjectileFromSprite(img`
+                . 1 . 
+                1 1 1 
+                . 1 . 
+                `, _player, randint(50, 80), randint(-15, 15))
+            bullet.setFlag(SpriteFlag.AutoDestroy, true)
+        }
     }
 })
 game.onUpdateInterval(500, function () {
@@ -263,4 +311,5 @@ game.onUpdateInterval(500, function () {
         currentEnemy.setFlag(SpriteFlag.AutoDestroy, true)
         currentenemies += 1
     }
+    initenemies += 1
 })
