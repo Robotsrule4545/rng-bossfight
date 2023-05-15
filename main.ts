@@ -9,19 +9,21 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Platform, function (sprite, otherSprite) {
-    if (sprite.x >= otherSprite.y - 2) {
-        sprite.setPosition(sprite.x, otherSprite.y - 15)
-    }
+    sprite.setPosition(sprite.x, otherSprite.y - 15)
+})
+statusbars.onZero(StatusBarKind.EnemyHealth, function (status) {
+    sprites.destroy(enemystatusbar.spriteAttachedTo())
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Superplatform, function (sprite, otherSprite) {
     sprite.setPosition(otherSprite.x, otherSprite.y - 45)
     sprites.destroy(otherSprite)
 })
-let enemystatusbar: StatusBarSprite = null
 let currentEnemy: Sprite = null
 let enemyRNG = 0
 let currentPlatform: Sprite = null
 let platformRNG = 0
+let bullet: Sprite = null
+let enemystatusbar: StatusBarSprite = null
 let cooldown = 0
 let _player: Sprite = null
 let currentenemies = 0
@@ -160,6 +162,15 @@ game.onUpdateInterval(5000, function () {
 game.onUpdateInterval(2000, function () {
     cooldown = 0
 })
+game.onUpdateInterval(1500, function () {
+    for (let index = 0; index < 8; index++) {
+        bullet = sprites.createProjectileFromSprite(img`
+            5 5 5 4 
+            5 5 5 4 
+            `, _player, randint(30, 50), randint(-30, 30))
+        bullet.setFlag(SpriteFlag.AutoDestroy, true)
+    }
+})
 game.onUpdateInterval(500, function () {
     platformRNG = randint(0, 100)
     if (platformRNG < 33) {
@@ -229,7 +240,7 @@ game.onUpdateInterval(500, function () {
                 `, SpriteKind.Enemy)
             currentEnemy.setPosition(150, randint(10, 160))
         }
-        enemystatusbar = statusbars.create(10, 2, StatusBarKind.Health)
+        enemystatusbar = statusbars.create(10, 2, StatusBarKind.EnemyHealth)
         enemystatusbar.attachToSprite(currentEnemy)
         currentEnemy.setFlag(SpriteFlag.AutoDestroy, true)
         currentenemies += 1
