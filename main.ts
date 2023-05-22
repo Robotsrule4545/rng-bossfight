@@ -89,8 +89,8 @@ let enemylaser: Sprite = null
 let initenemies = 0
 let currentenemies = 0
 let cooldown = 0
-let shardDropChance = 0
 let killbrick: Sprite = null
+let shardDropChance = 0
 let current_weapon = 0
 let endgamemessages: string[] = []
 let _player: Sprite = null
@@ -235,24 +235,6 @@ scene.setBackgroundImage(img`
     eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     `)
 scene.setBackgroundColor(15)
-killbrick = sprites.create(img`
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 f 2 2 2 2 2 2 2 f 2 2 2 
-    2 2 2 2 f 2 2 2 2 2 2 2 f 2 2 2 
-    2 2 2 2 f 2 2 2 2 2 2 2 f 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 f f f f f f f f f 2 2 2 
-    2 2 2 2 2 2 2 2 f 2 2 2 f 2 2 2 
-    2 2 2 2 2 2 2 2 f f f f f 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
-    `, SpriteKind.killbrick)
 game.onUpdate(function () {
     if (current_weapon == 1) {
         _player.setImage(assets.image`player_sword`)
