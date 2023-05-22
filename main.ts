@@ -3,7 +3,42 @@ namespace SpriteKind {
     export const Superplatform = SpriteKind.create()
     export const enemyProjectile = SpriteKind.create()
     export const bossShard = SpriteKind.create()
+    export const killbrick = SpriteKind.create()
 }
+/**
+ * <------ On start
+ * 
+ * Initialize sprites, add moving, add gravity, add rules
+ */
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite5, otherSprite4) {
+    sprites.destroy(sprite5, effects.fire, 500)
+    sprites.destroy(otherSprite4, effects.fire, 500)
+    info.changeScoreBy(1)
+    shardDropChance = randint(0, 3)
+    if (game.runtime() > 7000) {
+        if (shardDropChance == 2) {
+            killbrick = sprites.create(img`
+                . . . . . . 1 1 
+                . . . 1 1 1 3 1 
+                . 1 1 4 4 4 3 1 
+                1 4 4 4 4 4 3 1 
+                . 1 4 4 4 4 3 1 
+                . 1 4 4 4 4 3 1 
+                . . 1 1 1 4 3 1 
+                . . . . . 1 1 . 
+                `, SpriteKind.bossShard)
+            killbrick.setPosition(otherSprite4.x, otherSprite4.y)
+            killbrick.setFlag(SpriteFlag.AutoDestroy, true)
+        }
+        sprites.destroy(sprite5, effects.fire, 500)
+        sprites.destroy(otherSprite4, effects.fire, 500)
+        info.changeScoreBy(1)
+        shardDropChance = randint(0, 3)
+    }
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.killbrick, function (sprite, otherSprite) {
+    game.gameOver(false)
+})
 sprites.onOverlap(SpriteKind.enemyProjectile, SpriteKind.Player, function (sprite, otherSprite) {
     if (current_weapon == 0) {
         sprites.destroy(sprite, effects.ashes, 500)
@@ -26,52 +61,25 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
         cooldown = 1
     }
 })
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Platform, function (sprite, otherSprite) {
-    sprite.setPosition(sprite.x, otherSprite.y - 15)
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Superplatform, function (sprite3, otherSprite3) {
+    sprite3.setPosition(otherSprite3.x, otherSprite3.y - 45)
+    sprites.destroy(otherSprite3)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Platform, function (sprite2, otherSprite2) {
+    sprite2.setPosition(sprite2.x, otherSprite2.y - 15)
 })
 statusbars.onZero(StatusBarKind.Health, function (status) {
+    game.setGameOverMessage(false, endgamemessages[randint(1, 5)])
     game.gameOver(false)
-    game.setGameOverMessage(false, "GAME OVER!")
 })
-sprites.onOverlap(SpriteKind.Player, SpriteKind.Superplatform, function (sprite, otherSprite) {
-    sprite.setPosition(otherSprite.x, otherSprite.y - 45)
-    sprites.destroy(otherSprite)
-})
-sprites.onCreated(SpriteKind.Projectile, function (sprite) {
+sprites.onCreated(SpriteKind.Projectile, function (sprite4) {
     if (current_weapon == 1) {
         timer.background(function () {
             pause(400)
-            sprites.destroy(sprite)
+            sprites.destroy(sprite4)
         })
     }
 })
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
-    sprites.destroy(sprite, effects.fire, 500)
-    sprites.destroy(otherSprite, effects.fire, 500)
-    info.changeScoreBy(1)
-    shardDropChance = randint(0, 3)
-    if (game.runtime() > 5000) {
-        if (shardDropChance == 2) {
-            shard = sprites.create(img`
-                . . . . . . 1 1 
-                . . . 1 1 1 3 1 
-                . 1 1 4 4 4 3 1 
-                1 4 4 4 4 4 3 1 
-                . 1 4 4 4 4 3 1 
-                . 1 4 4 4 4 3 1 
-                . . 1 1 1 4 3 1 
-                . . . . . 1 1 . 
-                `, SpriteKind.bossShard)
-            shard.setPosition(otherSprite.x, otherSprite.y)
-            shard.setFlag(SpriteFlag.AutoDestroy, true)
-        }
-    }
-})
-/**
- * <------ On start
- * 
- * Initialize sprites, add moving, add gravity, add rules
- */
 let enemyRNG = 0
 let currentPlatform: Sprite = null
 let platformRNG = 0
@@ -79,18 +87,26 @@ let bullet: Sprite = null
 let currentEnemy: Sprite = null
 let enemylaser: Sprite = null
 let initenemies = 0
-let shard: Sprite = null
-let shardDropChance = 0
+let currentenemies = 0
 let cooldown = 0
+let shardDropChance = 0
+let killbrick: Sprite = null
 let current_weapon = 0
+let endgamemessages: string[] = []
 let _player: Sprite = null
 let statusbar: StatusBarSprite = null
-let currentenemies = 0
 info.setScore(0)
 statusbar = statusbars.create(10, 2, StatusBarKind.Health)
 _player = sprites.create(assets.image`player_gun1`, SpriteKind.Player)
 statusbar.attachToSprite(_player)
 statusbar.max = 10
+endgamemessages = [
+"Press E to switch weapons!",
+"Press SPACE to jump!",
+"Watch out, platforms may be buggy!",
+"P.S You're in a cave.",
+"Use A and D to move back and forth!"
+]
 controller.moveSprite(_player, 60, 0)
 current_weapon = 0
 _player.ay = 50
@@ -219,6 +235,24 @@ scene.setBackgroundImage(img`
     eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     `)
 scene.setBackgroundColor(15)
+killbrick = sprites.create(img`
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2 2 2 2 f 2 2 2 2 2 2 2 f 2 2 2 
+    2 2 2 2 f 2 2 2 2 2 2 2 f 2 2 2 
+    2 2 2 2 f 2 2 2 2 2 2 2 f 2 2 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2 2 2 2 f f f f f f f f f 2 2 2 
+    2 2 2 2 2 2 2 2 f 2 2 2 f 2 2 2 
+    2 2 2 2 2 2 2 2 f f f f f 2 2 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 2 
+    `, SpriteKind.killbrick)
 game.onUpdate(function () {
     if (current_weapon == 1) {
         _player.setImage(assets.image`player_sword`)
@@ -229,6 +263,9 @@ game.onUpdate(function () {
 game.onUpdateInterval(5000, function () {
     sprites.destroyAllSpritesOfKind(SpriteKind.Enemy)
     currentenemies = 0
+})
+game.onUpdateInterval(5000, function () {
+    statusbar.value += 1
 })
 game.onUpdateInterval(2000, function () {
     if (0 < initenemies) {
@@ -248,9 +285,6 @@ game.onUpdateInterval(2000, function () {
             enemylaser.setFlag(SpriteFlag.AutoDestroy, true)
         }
     }
-})
-game.onUpdateInterval(2000, function () {
-    statusbar.value += 1
 })
 game.onUpdateInterval(400, function () {
     if (current_weapon == 1) {
@@ -304,9 +338,6 @@ game.onUpdateInterval(1500, function () {
             bullet.setFlag(SpriteFlag.AutoDestroy, true)
         }
     }
-})
-game.onUpdateInterval(500, function () {
-    cooldown = 0
 })
 game.onUpdateInterval(500, function () {
     platformRNG = randint(0, 100)
@@ -381,4 +412,7 @@ game.onUpdateInterval(500, function () {
         currentenemies += 1
     }
     initenemies += 1
+})
+game.onUpdateInterval(500, function () {
+    cooldown = 0
 })
