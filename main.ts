@@ -2,14 +2,15 @@ namespace SpriteKind {
     export const Platform = SpriteKind.create()
     export const Superplatform = SpriteKind.create()
     export const enemyProjectile = SpriteKind.create()
+    export const bossShard = SpriteKind.create()
 }
 sprites.onOverlap(SpriteKind.enemyProjectile, SpriteKind.Player, function (sprite, otherSprite) {
     if (current_weapon == 0) {
         sprites.destroy(sprite, effects.ashes, 500)
-        statusbar.value += -2
-    } else if (current_weapon == 0) {
+        statusbar.value += -3
+    } else if (current_weapon == 1) {
         sprites.destroy(sprite, effects.starField, 500)
-        statusbar.value += -1
+        statusbar.value += -2
     }
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -30,6 +31,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Platform, function (sprite, othe
 })
 statusbars.onZero(StatusBarKind.Health, function (status) {
     game.gameOver(false)
+    game.setGameOverMessage(false, "GAME OVER!")
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Superplatform, function (sprite, otherSprite) {
     sprite.setPosition(otherSprite.x, otherSprite.y - 45)
@@ -47,6 +49,23 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     sprites.destroy(sprite, effects.fire, 500)
     sprites.destroy(otherSprite, effects.fire, 500)
     info.changeScoreBy(1)
+    shardDropChance = randint(0, 3)
+    if (game.runtime() > 5000) {
+        if (shardDropChance == 2) {
+            shard = sprites.create(img`
+                . . . . . . 1 1 
+                . . . 1 1 1 3 1 
+                . 1 1 4 4 4 3 1 
+                1 4 4 4 4 4 3 1 
+                . 1 4 4 4 4 3 1 
+                . 1 4 4 4 4 3 1 
+                . . 1 1 1 4 3 1 
+                . . . . . 1 1 . 
+                `, SpriteKind.bossShard)
+            shard.setPosition(otherSprite.x, otherSprite.y)
+            shard.setFlag(SpriteFlag.AutoDestroy, true)
+        }
+    }
 })
 /**
  * <------ On start
@@ -60,6 +79,8 @@ let bullet: Sprite = null
 let currentEnemy: Sprite = null
 let enemylaser: Sprite = null
 let initenemies = 0
+let shard: Sprite = null
+let shardDropChance = 0
 let cooldown = 0
 let current_weapon = 0
 let _player: Sprite = null
@@ -211,7 +232,7 @@ game.onUpdateInterval(5000, function () {
 })
 game.onUpdateInterval(2000, function () {
     if (0 < initenemies) {
-        for (let index = 0; index < 5; index++) {
+        for (let index = 0; index < 2; index++) {
             enemylaser = sprites.create(img`
                 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
                 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
