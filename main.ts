@@ -4,8 +4,13 @@ namespace SpriteKind {
     export const enemyProjectile = SpriteKind.create()
 }
 sprites.onOverlap(SpriteKind.enemyProjectile, SpriteKind.Player, function (sprite, otherSprite) {
-    sprites.destroy(sprite, effects.ashes, 500)
-    statusbar.value += -1
+    if (current_weapon == 0) {
+        sprites.destroy(sprite, effects.ashes, 500)
+        statusbar.value += -2
+    } else if (current_weapon == 0) {
+        sprites.destroy(sprite, effects.starField, 500)
+        statusbar.value += -1
+    }
 })
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (current_weapon == 1) {
@@ -22,22 +27,6 @@ controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Platform, function (sprite, otherSprite) {
     sprite.setPosition(sprite.x, otherSprite.y - 15)
-})
-statusbars.onStatusReached(StatusBarKind.Health, statusbars.StatusComparison.LT, statusbars.ComparisonType.Percentage, 40, function (status) {
-    dead_hud = sprites.create(img`
-        . . . . . . f f f f . . . . . . 
-        . . . . f f . . . . f f . . . . 
-        . . . . f . . . . . . f . . . . 
-        . . . f . . . . . . . . f . . . 
-        . . . f . . . . . . . . f . . . 
-        . . f . . . . . . . . . . f . . 
-        . . f . . . . . . . . . . f . . 
-        . . f . . . . . . . . . . f . . 
-        . f . . . . . . . . . . . . f . 
-        . f . . . . . . . . . . . . f . 
-        f . . . . . . . . . . . . . . f 
-        f f f f f f f f f f f f f f f f 
-        `, SpriteKind.Player)
 })
 statusbars.onZero(StatusBarKind.Health, function (status) {
     game.gameOver(false)
@@ -71,7 +60,6 @@ let bullet: Sprite = null
 let currentEnemy: Sprite = null
 let enemylaser: Sprite = null
 let initenemies = 0
-let dead_hud: Sprite = null
 let cooldown = 0
 let current_weapon = 0
 let _player: Sprite = null
@@ -222,9 +210,6 @@ game.onUpdateInterval(5000, function () {
     currentenemies = 0
 })
 game.onUpdateInterval(2000, function () {
-    cooldown = 0
-})
-game.onUpdateInterval(1000, function () {
     if (0 < initenemies) {
         for (let index = 0; index < 5; index++) {
             enemylaser = sprites.create(img`
@@ -242,6 +227,9 @@ game.onUpdateInterval(1000, function () {
             enemylaser.setFlag(SpriteFlag.AutoDestroy, true)
         }
     }
+})
+game.onUpdateInterval(2000, function () {
+    statusbar.value += 1
 })
 game.onUpdateInterval(400, function () {
     if (current_weapon == 1) {
@@ -295,6 +283,9 @@ game.onUpdateInterval(1500, function () {
             bullet.setFlag(SpriteFlag.AutoDestroy, true)
         }
     }
+})
+game.onUpdateInterval(500, function () {
+    cooldown = 0
 })
 game.onUpdateInterval(500, function () {
     platformRNG = randint(0, 100)
