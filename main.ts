@@ -6,7 +6,33 @@ namespace SpriteKind {
     export const killbrick = SpriteKind.create()
     export const boss = SpriteKind.create()
     export const flash = SpriteKind.create()
+    export const finish = SpriteKind.create()
 }
+/**
+ * HOW TO PLAY:
+ * 
+ * - A and D to move back and forth
+ * 
+ * - Space to jump!
+ * 
+ * - E to switch weapon!
+ * 
+ * - Sword can half damage dealt to you(reflect lasers)
+ * 
+ * - Collect 4 or more shards to summon the boss!
+ * 
+ * - The boss has a one-shot attack, beware when it turns purple!
+ * 
+ * - Shoot the mini-eyes that spawn on the side to get points!
+ */
+sprites.onOverlap(SpriteKind.boss, SpriteKind.Projectile, function (sprite, otherSprite) {
+    if (current_weapon == 0) {
+        bossStatusBar.value += -1
+    } else if (current_weapon == 1) {
+        bossStatusBar.value += -5
+    }
+    sprites.destroy(otherSprite)
+})
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite5, otherSprite4) {
     sprites.destroy(sprite5, effects.fire, 500)
     sprites.destroy(otherSprite4, effects.fire, 500)
@@ -44,6 +70,13 @@ sprites.onOverlap(SpriteKind.enemyProjectile, SpriteKind.Player, function (sprit
         statusbar.value += -2
     }
 })
+sprites.onOverlap(SpriteKind.Player, SpriteKind.finish, function (sprite, otherSprite) {
+    flashScreen()
+    timer.after(1000, function () {
+        game.setGameOverMessage(true, "Eye down, eye defeated it!")
+        game.gameOver(true)
+    })
+})
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (current_weapon == 1) {
         current_weapon = 0
@@ -52,6 +85,14 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 function bossFight () {
+    bossStatusBar = statusbars.create(120, 5, StatusBarKind.EnemyHealth)
+    bossStatusBar.setLabel("BOSS")
+    bossStatusBar.setBarBorder(1, 4)
+    bossStatusBar.setColor(2, 1)
+    bossStatusBar.setStatusBarFlag(StatusBarFlag.SmoothTransition, true)
+    bossStatusBar.max = 75
+    bossStatusBar.positionDirection(CollisionDirection.Top)
+    bossStatusBar.value = 300
     eyeboss = sprites.create(img`
         ...fffffffffffff
         ...fffffffffffff
@@ -62,9 +103,9 @@ function bossFight () {
         fff2221111111111
         fff2221111111111
         fff2221111111111
-        fff...2221111111
-        fff...2221111111
-        fff...2221111111
+        fff1112221111111
+        fff1112221111111
+        fff1112221111111
         fff5552221111111
         fff5552221111111
         fff5552221111111
@@ -74,9 +115,9 @@ function bossFight () {
         fff5552221111111
         fff5552221111111
         fff5552221111111
-        fff...2221111111
-        fff...2221111111
-        fff...2221111111
+        fff1112221111111
+        fff1112221111111
+        fff1112221111111
         fff2221111111111
         fff2221111111111
         fff2221111111111
@@ -87,8 +128,9 @@ function bossFight () {
         ...fffffffffffff
         ...fffffffffffff
         `, SpriteKind.boss)
-    eyeboss.changeScale(3, ScaleAnchor.Middle)
-    eyeboss.setPosition(130, 59)
+    eyeboss.changeScale(2, ScaleAnchor.Right)
+    eyeboss.setPosition(150, 60)
+    bossonscreen = 1
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (cooldown == 0) {
@@ -102,6 +144,10 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Superplatform, function (sprite3
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Platform, function (sprite2, otherSprite2) {
     sprite2.setPosition(sprite2.x, otherSprite2.y - 15)
+})
+statusbars.onZero(StatusBarKind.EnemyHealth, function (status) {
+    bossAlive = 0
+    sprites.destroy(eyeboss, effects.disintegrate, 5000)
 })
 statusbars.onZero(StatusBarKind.Health, function (status) {
     game.setGameOverMessage(false, endgamemessages[randint(0, 4)])
@@ -423,35 +469,46 @@ function flashScreen () {
 sprites.onCreated(SpriteKind.Projectile, function (sprite4) {
     if (current_weapon == 1) {
         timer.background(function () {
-            pause(400)
+            pause(100)
             sprites.destroy(sprite4)
         })
     }
+})
+sprites.onCreated(SpriteKind.flash, function (sprite) {
+    timer.after(50, function () {
+        sprites.destroy(sprite)
+    })
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.bossShard, function (sprite, otherSprite) {
     bossShards += 1
     sprites.destroy(otherSprite, effects.clouds, 500)
     flashScreen()
 })
+let enemyRNG = 0
 let currentPlatform: Sprite = null
 let platformRNG = 0
-let enemyRNG = 0
 let bullet: Sprite = null
 let currentEnemy: Sprite = null
 let enemylaser: Sprite = null
 let initenemies = 0
+let bossbullet: Sprite = null
 let currentenemies = 0
+let flag: Sprite = null
+let generatedFinish = 0
 let flash: Sprite = null
 let flashcooldown = 0
 let cooldown = 0
 let eyeboss: Sprite = null
 let shard: Sprite = null
 let shardDropChance = 0
+let bossStatusBar: StatusBarSprite = null
+let bossAlive = 0
 let current_weapon = 0
 let endgamemessages: string[] = []
 let _player: Sprite = null
 let statusbar: StatusBarSprite = null
 let bossonscreen = 0
+bossonscreen = 0
 let bossShards = 0
 info.setScore(0)
 statusbar = statusbars.create(10, 2, StatusBarKind.Health)
@@ -539,45 +596,45 @@ scene.setBackgroundImage(img`
     fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaaffffffffffffffffffffffffffffffffffff
     fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaafffffffffffffffffffffffffffffffffff
     ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaffffffffffffffffffffffffffffffffff
-    fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaafffffffffffffffffffffffffffffffff
-    ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaffffffffffffffffffffffffffffffff
-    fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaaafffffffffffffffffffffffffffff
-    fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaaaaafffffffffffffffffffffffff
-    ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaaaaaaaffffffffffffffffffffff
-    ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaaaaaaaffffffffffffffffffffff
-    ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaaaaaffffffffffffffffffffff
-    ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaaaffffffffffffffffffffff
-    ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaffffffffffffffffffffff
-    ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffeeeeeeeeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    ffffffffffffffffffffffffffffffffffffffffffffffffffffffffeeeeeeeeeeeeeeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    ffffffffffffffffffffffffffffffffffffffffffffffffffeeeeeeeeeeeeeeeeeeeeeeeeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    ffffffffffffffffffffffffffffffffffffffffffffeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    fffffffffffffffffffffffffffffffffffffffeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    fffffffffffffffffffffffffffffffffeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    fffffffffffffffffffffffffffeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffffffeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeefffffffffffffff
-    ffffffffffffffffffffffeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeefffffffffffffeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffff
-    ffffffffffffffffeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeefffffffffff
-    ffffffffffeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeefffffff
-    ffffeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeff
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-    eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    ffffffffffffffffffffffffffffffff5ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaafffffffffffffffffffffffffffffffff
+    fffffffffffffffffffffffffffffff55fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaffffffffffffffffffffffffffffffff
+    ffffffffffffffffffffffffffffff545ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaaafffffffffffffffffffffffffffff
+    fffffffffffffffffffffffffffff5445ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaaaaafffffffffffffffffffffffff
+    fffffffffffffffffffffffffff554445fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaaaaaaaffffffffffffffffffffff
+    ffffffffffffffffffffffffffff54445fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaaaaaaaffffffffffffffffffffff
+    ffffffffffffffffffffffffffff544445ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaaaaaffffffffffffffffffffff
+    ffffffffffffffffffffffffffff544445ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaaaaaffffffffffffffffffffff
+    ffffffffffffffffffffffffffff544445ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffaaaaaaaaffffffffffffffffffffff
+    ffffffffffffffffffffffffffff544445fffffffffff5ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    ffffffffffffffffffffffffffff544445ffffffffff55ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    fffffffffffffffffffffffffffff54445fffffffff545ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    fffffffffffffffffffffffffffff544445ffffffff5445fffffffffffffffeeeeeeeeffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    ffffffffffffffffffff55fffffff544445fffffff544445ffffffffeeeeeeeeeeeeeeeeeeefffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
+    ffffffffffffffffff5545fffffff544445ffffff5444445ffeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffffffffffffffffffffffffffffffffffffffff777777fffffffffffffffff
+    fffffffffffffffffff5445ffffff544445ffffff5444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffffffffffffffffffffffffffffffff7777777666777fffffffffffffffff
+    fffffffffffffffffff54445fffff544445ffffe54444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeefffffffffffffffffffffffffffffffffffffffffffffff77666666677677fffffffffffffffff
+    fffffffffffffffffff544445ffff5444445eee54444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeefffffffffffffffffffffffffffffffffffffffffffff766766667766767fffffffffffffffff
+    ffffffffffffffffffff544445feee544445eee54444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffffffffffffffffffffffeeeeeeeeeeeeeeeeeeee7667667766667667efffffffffffffff
+    ffffffffffffffffffff544445eeee544445ee544444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeefffffffffffffeeeeeeeeeeeeeeeeeeeeeeeeeeee76666776666676667eeffffffffffffff
+    ffffffffffffffffeeeee544445eee544445e544444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeffffeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee7666667766667666667eeeefffffffffff
+    ffffffffffeeeeeeeeeee5444445ee544445e544444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee7666676677667666667eeeeeeeefffffff
+    ffffeeeeeeeeeeeeeeeee54444445e5444445444444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee76666676666777776667eeeeeeeeeeeeeff
+    eeeeeeeeeeeeeeeeeeeeee54444445544445444444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee7666667666667666677777eeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeee54444444544445444444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee76666766666766666677eeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeee5444444454445444444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee7666667666776666667eeeeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeeee544444454445444444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee7666667666766666677eeeeeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeeee544444454445444444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee76666766676666667eeeeeeeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeeeee5444445445544444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee76666766676666667eeeeeeeeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeeeee5444445445444444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee76666676676666677eeeeeeeeeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeeeee5544445445444444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee766667677666667eeeeeeeeeeeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeeeeee54444555444444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee7767676666677eeeeeeeeeeeeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeeeeeee5445454444444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee777666667eeeeeeeeeeeeeeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeeeeeee5445544444444445eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee776677eeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeeeeeeee54544444444555eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee77eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeeeeeeee55444444555eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeeeeeeeee5444455eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeeeeeeeee54555eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+    eeeeeeeeeeeeeeeeeeeeeeeeeeee55eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
@@ -593,6 +650,7 @@ scene.setBackgroundImage(img`
     eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
     `)
 scene.setBackgroundColor(15)
+bossAlive = 1
 game.onUpdate(function () {
     if (current_weapon == 1) {
         _player.setImage(assets.image`player_sword`)
@@ -601,10 +659,36 @@ game.onUpdate(function () {
     }
 })
 game.onUpdate(function () {
-    if (bossShards >= 4) {
-        bossonscreen = 1
+    if (bossShards >= 4 && info.score() >= 20) {
         bossShards = 0
         bossFight()
+    }
+    if (bossAlive == 0) {
+        timer.after(2000, function () {
+            if (generatedFinish == 0) {
+                scroller.scrollBackgroundWithSpeed(0, 0)
+                flag = sprites.create(img`
+                    . . . . . . . . . . . . . . . . 
+                    . . . . . . . b . . . . . . . . 
+                    . . 2 2 2 2 2 b b . . . . . . . 
+                    . . . 2 2 2 2 b b . . . . . . . 
+                    . . . . 2 2 2 b b . . . . . . . 
+                    . . . . . . . b b . . . . . . . 
+                    . . . . . . . b b . . . . . . . 
+                    . . . . . . . b b . . . . . . . 
+                    . . . . . . . b b . . . . . . . 
+                    . . . . . . . b b . . . . . . . 
+                    . . . . . . . b b . . . . . . . 
+                    . . . . . . . b b . . . . . . . 
+                    . . . . . . b b b b . . . . . . 
+                    . . . b b b f f f f b b b . . . 
+                    . . b f f f f f f f f f f b . . 
+                    . b b f f f f f f f f f f b b . 
+                    `, SpriteKind.finish)
+                flag.setPosition(148, 110)
+                generatedFinish = 1
+            }
+        })
     }
 })
 game.onUpdateInterval(5000, function () {
@@ -612,6 +696,166 @@ game.onUpdateInterval(5000, function () {
     flashcooldown = 0
     sprites.destroyAllSpritesOfKind(SpriteKind.Enemy)
     currentenemies = 0
+})
+game.onUpdateInterval(5000, function () {
+    if (bossonscreen == 1) {
+        if (bossAlive == 1) {
+            for (let index = 0; index < 5; index++) {
+                bossbullet = sprites.create(img`
+                    2 2 2 
+                    2 2 2 
+                    2 2 2 
+                    2 2 2 
+                    2 2 2 
+                    2 2 2 
+                    `, SpriteKind.enemyProjectile)
+                bossbullet.setPosition(eyeboss.x, eyeboss.y)
+                bossbullet.setVelocity(-40, randint(-40, 40))
+                bossbullet.setFlag(SpriteFlag.AutoDestroy, true)
+            }
+            timer.after(2000, function () {
+                for (let index = 0; index < 5; index++) {
+                    bossbullet = sprites.create(img`
+                        2 2 2 2 2 2 
+                        2 2 2 2 2 2 
+                        2 2 2 2 2 2 
+                        `, SpriteKind.enemyProjectile)
+                    bossbullet.setPosition(eyeboss.x, eyeboss.y)
+                    bossbullet.setVelocity(-60, randint(-10, 10))
+                    bossbullet.setFlag(SpriteFlag.AutoDestroy, true)
+                }
+                eyeboss.setImage(img`
+                    ...aaaaaaaaaaaaa
+                    ...aaaaaaaaaaaaa
+                    ...aaaaaaaaaaaaa
+                    aaa3333333333333
+                    aaa3333333333333
+                    aaa3333333333333
+                    aaa2223333333333
+                    aaa2223333333333
+                    aaa2223333333333
+                    aaa3332223333333
+                    aaa3332223333333
+                    aaa3332223333333
+                    aaabbb2223333333
+                    aaabbb2223333333
+                    aaabbb2223333333
+                    aaaddd2223333333
+                    aaaddd2223333333
+                    aaaddd2223333333
+                    aaabbb2223333333
+                    aaabbb2223333333
+                    aaabbb2223333333
+                    aaa3332223333333
+                    aaa3332223333333
+                    aaa3332223333333
+                    aaa2223333333333
+                    aaa2223333333333
+                    aaa2223333333333
+                    aaa3333333333333
+                    aaa3333333333333
+                    aaa3333333333333
+                    ...aaaaaaaaaaaaa
+                    ...aaaaaaaaaaaaa
+                    ...aaaaaaaaaaaaa
+                    `)
+            })
+            timer.after(5000, function () {
+                for (let index = 0; index < 3; index++) {
+                    scene.cameraShake(8, 500)
+                    bossbullet = sprites.create(img`
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        .................33333..................................................................................................
+                        ..............33333333..................................................................................................
+                        ..........3333333333333.................................................................................................
+                        ........333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333................
+                        ........33333333aaaa33333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333........
+                        ........3333aaaaaaaaa333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333333...
+                        ........333aaaafaaafaad1111111111111111111111111111111111111111111111111111111111111111111111111111111333333333333333...
+                        ........3333aaaaaaaaaad1111111111111111111111111111111111111111111111111111111111111111111111111111111113333333333333...
+                        ........3333aaaaaaaaaad1111111111111111111111111111111111111111111111111111111111111111111111111111133333333333333......
+                        .........333aaafaaafaad311111111111111111111111111111111111111111111111111111111111111111111111133333333333333..........
+                        .........3333aaaaaaaaaa33311111111111111111111111111111111111111111111111111111111111111111133333333333333..............
+                        .........3333aaaafaaaaa3333111111111111111111111111111111111111111111111111111111111111133333333333333..................
+                        ..........333aaaaaaaaa3333333333333333333333333333333331111111111111111111111111111133333333333333......................
+                        ..........3333aa333333333333333333333333333333333333333333333333333333333333333333333333333333..........................
+                        ..........33333333333333333333333333333333333333333333333333333333333333333333333333333333..............................
+                        ...........3333333333333.............................333333333333333333333333333333333..................................
+                        ............333333......................................................................................................
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        ........................................................................................................................
+                        `, SpriteKind.enemyProjectile)
+                    bossbullet.setPosition(eyeboss.x, eyeboss.y)
+                    bossbullet.setVelocity(-300, randint(-50, 50))
+                    bossbullet.setFlag(SpriteFlag.AutoDestroy, true)
+                }
+                eyeboss.setImage(img`
+                    ...fffffffffffff
+                    ...fffffffffffff
+                    ...fffffffffffff
+                    fff1111111111111
+                    fff1111111111111
+                    fff1111111111111
+                    fff2221111111111
+                    fff2221111111111
+                    fff2221111111111
+                    fff1112221111111
+                    fff1112221111111
+                    fff1112221111111
+                    fff5552221111111
+                    fff5552221111111
+                    fff5552221111111
+                    fff4442221111111
+                    fff4442221111111
+                    fff4442221111111
+                    fff5552221111111
+                    fff5552221111111
+                    fff5552221111111
+                    fff1112221111111
+                    fff1112221111111
+                    fff1112221111111
+                    fff2221111111111
+                    fff2221111111111
+                    fff2221111111111
+                    fff1111111111111
+                    fff1111111111111
+                    fff1111111111111
+                    ...fffffffffffff
+                    ...fffffffffffff
+                    ...fffffffffffff
+                    `)
+            })
+            timer.after(5000, function () {
+                bossbullet = sprites.create(img`
+                    c b b d 
+                    c a a d 
+                    c a a b 
+                    c c c c 
+                    `, SpriteKind.enemyProjectile)
+                bossbullet.setFlag(SpriteFlag.AutoDestroy, true)
+                bossbullet.startEffect(effects.trail, 5000)
+                bossbullet.setPosition(eyeboss.x, eyeboss.y)
+                bossbullet.follow(_player, 100)
+                timer.after(500, function () {
+                    bossbullet.setVelocity(0, 0)
+                    sprites.destroy(bossbullet, effects.spray, 500)
+                })
+            })
+        }
+    }
 })
 game.onUpdateInterval(2000, function () {
     if (0 < initenemies) {
@@ -634,7 +878,98 @@ game.onUpdateInterval(2000, function () {
         }
     }
 })
-game.onUpdateInterval(400, function () {
+game.onUpdateInterval(1500, function () {
+    if (current_weapon == 0) {
+        for (let index = 0; index < 6; index++) {
+            bullet = sprites.createProjectileFromSprite(img`
+                . 1 . 
+                1 1 1 
+                . 1 . 
+                `, _player, randint(50, 80), randint(-15, 15))
+            bullet.setFlag(SpriteFlag.AutoDestroy, true)
+        }
+    }
+})
+game.onUpdateInterval(500, function () {
+    if (bossAlive == 1) {
+        platformRNG = randint(0, 100)
+        if (platformRNG < 33) {
+            currentPlatform = sprites.create(assets.image`Vpipe`, SpriteKind.Platform)
+            currentPlatform.setPosition(160, 115)
+        } else if (platformRNG >= 33 && platformRNG < 40) {
+            currentPlatform = sprites.create(assets.image`Springboard`, SpriteKind.Superplatform)
+            currentPlatform.setPosition(160, randint(40, 120))
+        } else if (platformRNG >= 40 && platformRNG <= 100) {
+            currentPlatform = sprites.create(assets.image`Hpipe`, SpriteKind.Platform)
+            currentPlatform.setPosition(160, randint(40, 120))
+        } else {
+            currentPlatform = sprites.create(assets.image`undefined`, SpriteKind.Platform)
+        }
+        currentPlatform.setVelocity(-50, 0)
+        currentPlatform.setFlag(SpriteFlag.AutoDestroy, true)
+        if (bossonscreen == 0) {
+            if (currentenemies <= 3) {
+                enemyRNG = randint(0, 100)
+                if (enemyRNG < 33) {
+                    currentEnemy = sprites.create(img`
+                        . . f f f f . . 
+                        . f 1 1 1 1 f . 
+                        f 9 9 1 1 1 1 f 
+                        f 1 9 1 1 1 1 f 
+                        f 8 9 1 1 1 1 f 
+                        f 9 9 1 1 1 1 f 
+                        . f 1 1 1 1 f . 
+                        . . f f f f . . 
+                        `, SpriteKind.Enemy)
+                    currentEnemy.setPosition(150, randint(5, 100))
+                } else if (enemyRNG >= 33 && enemyRNG <= 66) {
+                    currentEnemy = sprites.create(img`
+                        . . f f f f . . 
+                        . f 1 1 1 1 f . 
+                        f 3 3 1 1 1 1 f 
+                        f 1 3 1 1 1 1 f 
+                        f a 3 1 1 1 1 f 
+                        f 3 3 1 1 1 1 f 
+                        . f 1 1 1 1 f . 
+                        . . f f f f . . 
+                        `, SpriteKind.Enemy)
+                    currentEnemy.setPosition(150, randint(40, 110))
+                } else if (enemyRNG >= 66 && enemyRNG <= 99) {
+                    currentEnemy = sprites.create(img`
+                        . . f f f f . . 
+                        . f 1 1 1 1 f . 
+                        f 4 4 1 1 1 1 f 
+                        f 1 4 1 1 1 1 f 
+                        f 2 4 1 1 1 1 f 
+                        f 4 4 1 1 1 1 f 
+                        . f 1 1 1 1 f . 
+                        . . f f f f . . 
+                        `, SpriteKind.Enemy)
+                    currentEnemy.setPosition(150, _player.y)
+                } else if (enemyRNG == 100) {
+                    currentEnemy = sprites.create(img`
+                        . . f f f f . . 
+                        . f 3 3 3 3 f . 
+                        f 5 5 3 3 3 3 f 
+                        f 1 5 3 3 3 3 f 
+                        f 4 5 3 3 3 3 f 
+                        f 5 5 3 3 3 3 f 
+                        . f 3 3 3 3 f . 
+                        . . f f f f . . 
+                        `, SpriteKind.Enemy)
+                    currentEnemy.setPosition(150, _player.y)
+                }
+                currentEnemy.setFlag(SpriteFlag.AutoDestroy, true)
+                currentenemies += 1
+            }
+            initenemies += 1
+        }
+    }
+})
+game.onUpdateInterval(500, function () {
+    cooldown = 0
+})
+game.onUpdateInterval(300, function () {
     if (current_weapon == 1) {
         bullet = sprites.createProjectileFromSprite(img`
             1 8 . . . . . . . 
@@ -658,15 +993,18 @@ game.onUpdateInterval(400, function () {
         timer.background(function () {
             pause(200)
             bullet = sprites.createProjectileFromSprite(img`
-                . . . . . . . . . . 1 9 9 8 . . 
-                . . . . . . . . . 1 1 9 8 . . . 
-                . . . . . . . . 1 9 9 8 . . . . 
-                . . . . . . 1 1 9 8 8 . . . . . 
-                . . . 1 1 1 9 9 8 . . . . . . . 
-                . 1 1 9 9 9 8 8 . . . . . . . . 
-                1 9 9 8 8 8 . . . . . . . . . . 
-                9 8 8 . . . . . . . . . . . . . 
-                8 . . . . . . . . . . . . . . . 
+                . . . . . . . 1 . 
+                . . . . . . 1 9 8 
+                . . . . . . 1 9 8 
+                . . . . . . 1 9 8 
+                . . . . . . 1 9 8 
+                . . . . . . 1 9 8 
+                . . . . . . 1 9 8 
+                . . . . . 1 9 8 . 
+                . . . 1 1 9 8 8 . 
+                . 1 1 9 9 8 . . . 
+                1 9 9 8 8 . . . . 
+                . 8 8 . . . . . . 
                 `, _player, 46, 0)
             bullet.setFlag(SpriteFlag.AutoDestroy, true)
         })
@@ -674,95 +1012,4 @@ game.onUpdateInterval(400, function () {
             sprites.destroy(bullet)
         })
     }
-})
-game.onUpdateInterval(1500, function () {
-    if (current_weapon == 0) {
-        for (let index = 0; index < 6; index++) {
-            bullet = sprites.createProjectileFromSprite(img`
-                . 1 . 
-                1 1 1 
-                . 1 . 
-                `, _player, randint(50, 80), randint(-15, 15))
-            bullet.setFlag(SpriteFlag.AutoDestroy, true)
-        }
-    }
-})
-game.onUpdateInterval(500, function () {
-    if (bossonscreen == 0) {
-        if (currentenemies <= 3) {
-            enemyRNG = randint(0, 100)
-            if (enemyRNG < 33) {
-                currentEnemy = sprites.create(img`
-                    . . f f f f . . 
-                    . f 1 1 1 1 f . 
-                    f 9 9 1 1 1 1 f 
-                    f 1 9 1 1 1 1 f 
-                    f 8 9 1 1 1 1 f 
-                    f 9 9 1 1 1 1 f 
-                    . f 1 1 1 1 f . 
-                    . . f f f f . . 
-                    `, SpriteKind.Enemy)
-                currentEnemy.setPosition(150, randint(5, 100))
-            } else if (enemyRNG >= 33 && enemyRNG <= 66) {
-                currentEnemy = sprites.create(img`
-                    . . f f f f . . 
-                    . f 1 1 1 1 f . 
-                    f 3 3 1 1 1 1 f 
-                    f 1 3 1 1 1 1 f 
-                    f a 3 1 1 1 1 f 
-                    f 3 3 1 1 1 1 f 
-                    . f 1 1 1 1 f . 
-                    . . f f f f . . 
-                    `, SpriteKind.Enemy)
-                currentEnemy.setPosition(150, randint(40, 110))
-            } else if (enemyRNG >= 66 && enemyRNG <= 99) {
-                currentEnemy = sprites.create(img`
-                    . . f f f f . . 
-                    . f 1 1 1 1 f . 
-                    f 4 4 1 1 1 1 f 
-                    f 1 4 1 1 1 1 f 
-                    f 2 4 1 1 1 1 f 
-                    f 4 4 1 1 1 1 f 
-                    . f 1 1 1 1 f . 
-                    . . f f f f . . 
-                    `, SpriteKind.Enemy)
-                currentEnemy.setPosition(150, _player.y)
-            } else if (enemyRNG == 100) {
-                currentEnemy = sprites.create(img`
-                    . . f f f f . . 
-                    . f 3 3 3 3 f . 
-                    f 5 5 3 3 3 3 f 
-                    f 1 5 3 3 3 3 f 
-                    f 4 5 3 3 3 3 f 
-                    f 5 5 3 3 3 3 f 
-                    . f 3 3 3 3 f . 
-                    . . f f f f . . 
-                    `, SpriteKind.Enemy)
-                currentEnemy.setPosition(150, _player.y)
-            }
-            currentEnemy.setFlag(SpriteFlag.AutoDestroy, true)
-            currentenemies += 1
-        }
-        initenemies += 1
-    }
-})
-game.onUpdateInterval(500, function () {
-    platformRNG = randint(0, 100)
-    if (platformRNG < 33) {
-        currentPlatform = sprites.create(assets.image`Vpipe`, SpriteKind.Platform)
-        currentPlatform.setPosition(160, 115)
-    } else if (platformRNG >= 33 && platformRNG < 40) {
-        currentPlatform = sprites.create(assets.image`Springboard`, SpriteKind.Superplatform)
-        currentPlatform.setPosition(160, randint(40, 120))
-    } else if (platformRNG >= 40 && platformRNG <= 100) {
-        currentPlatform = sprites.create(assets.image`Hpipe`, SpriteKind.Platform)
-        currentPlatform.setPosition(160, randint(40, 120))
-    } else {
-        currentPlatform = sprites.create(assets.image`undefined`, SpriteKind.Platform)
-    }
-    currentPlatform.setVelocity(-50, 0)
-    currentPlatform.setFlag(SpriteFlag.AutoDestroy, true)
-})
-game.onUpdateInterval(500, function () {
-    cooldown = 0
 })
