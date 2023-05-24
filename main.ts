@@ -10,12 +10,19 @@ namespace SpriteKind {
     export const homingEnemyProjectile = SpriteKind.create()
     export const powerup = SpriteKind.create()
     export const medpack = SpriteKind.create()
+    export const ammoBox = SpriteKind.create()
+    export const lifestealdrop = SpriteKind.create()
 }
 sprites.onOverlap(SpriteKind.boss, SpriteKind.Projectile, function (sprite, otherSprite) {
     if (current_weapon == 0) {
-        bossStatusBar.value += -1
+        if (isLifesteal == 0) {
+            bossStatusBar.value += -1
+        } else if (isLifesteal == 1) {
+            bossStatusBar.value += -50
+            isLifesteal = 0
+        }
     } else if (current_weapon == 1) {
-        bossStatusBar.value += -5
+        bossStatusBar.value += -3
     }
     sprites.destroy(otherSprite)
 })
@@ -54,16 +61,16 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.killbrick, function (sprite, oth
         game.gameOver(false)
     } else if (current_weapon == 1) {
         sprites.destroy(otherSprite, effects.starField, 1000)
-        statusbar.value = 1
+        playerbar.value = 1
     }
 })
 sprites.onOverlap(SpriteKind.enemyProjectile, SpriteKind.Player, function (sprite, otherSprite) {
     if (current_weapon == 0) {
         sprites.destroy(sprite, effects.ashes, 500)
-        statusbar.value += -3
+        playerbar.value += -3
     } else if (current_weapon == 1) {
         sprites.destroy(sprite, effects.starField, 500)
-        statusbar.value += -2
+        playerbar.value += -2
     }
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.finish, function (sprite, otherSprite) {
@@ -82,13 +89,13 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 function bossFight () {
     bossStatusBar = statusbars.create(100, 5, StatusBarKind.EnemyHealth)
-    bossStatusBar.setLabel("BOSS")
+    bossStatusBar.setLabel("EYELORD")
     bossStatusBar.setBarBorder(1, 4)
     bossStatusBar.setColor(2, 1)
     bossStatusBar.setStatusBarFlag(StatusBarFlag.SmoothTransition, true)
-    bossStatusBar.max = 75
+    bossStatusBar.max = 150
     bossStatusBar.positionDirection(CollisionDirection.Top)
-    bossStatusBar.value = 300
+    bossStatusBar.value = 150
     eyeboss = sprites.create(img`
         ...fffffffffffff
         ...fffffffffffff
@@ -148,6 +155,16 @@ statusbars.onZero(StatusBarKind.EnemyHealth, function (status) {
 statusbars.onZero(StatusBarKind.Health, function (status) {
     game.setGameOverMessage(false, endgamemessages[randint(0, 4)])
     game.gameOver(false)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.lifestealdrop, function (sprite, otherSprite) {
+    sprites.destroy(otherSprite)
+    timer.background(function () {
+        isLifesteal = 1
+        slashSpeed = 200
+        pause(10000)
+        slashSpeed = 450
+        isLifesteal = 0
+    })
 })
 function flashScreen () {
     if (flashcooldown == 0) {
@@ -477,12 +494,20 @@ sprites.onCreated(SpriteKind.flash, function (sprite) {
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.medpack, function (sprite, otherSprite) {
     sprites.destroy(otherSprite)
-    statusbar.value += 1
+    playerbar.value += 1
     timer.background(function () {
         for (let index = 0; index < 3; index++) {
             pause(1000)
-            statusbar.value += 1
+            playerbar.value += 2
         }
+    })
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.ammoBox, function (sprite, otherSprite) {
+    sprites.destroy(otherSprite)
+    timer.background(function () {
+        starscatterProjectileNumber = 12
+        pause(5000)
+        starscatterProjectileNumber = 6
     })
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.bossShard, function (sprite, otherSprite) {
@@ -514,6 +539,7 @@ let platformRNG = 0
 let bullet: Sprite = null
 let enemylaser: Sprite = null
 let initenemies = 0
+let ammopowerup: Sprite = null
 let currentenemies = 0
 let medpack: Sprite = null
 let bossbullet: Sprite = null
@@ -521,6 +547,7 @@ let flag: Sprite = null
 let generatedFinish = 0
 let flash: Sprite = null
 let flashcooldown = 0
+let slashSpeed = 0
 let cooldown = 0
 let eyeboss: Sprite = null
 let shard: Sprite = null
@@ -530,15 +557,19 @@ let bossAlive = 0
 let current_weapon = 0
 let endgamemessages: string[] = []
 let _player: Sprite = null
-let statusbar: StatusBarSprite = null
+let playerbar: StatusBarSprite = null
 let bossonscreen = 0
+let starscatterProjectileNumber = 0
+let isLifesteal = 0
+isLifesteal = 0
+starscatterProjectileNumber = 6
 bossonscreen = 0
 let bossShards = 0
 info.setScore(0)
-statusbar = statusbars.create(10, 2, StatusBarKind.Health)
+playerbar = statusbars.create(10, 2, StatusBarKind.Health)
 _player = sprites.create(assets.image`player_gun1`, SpriteKind.Player)
-statusbar.attachToSprite(_player)
-statusbar.max = 10
+playerbar.attachToSprite(_player)
+playerbar.max = 10
 endgamemessages = [
 "Press E to switch weapons!",
 "Press SPACE to jump!",
@@ -675,9 +706,14 @@ scene.setBackgroundImage(img`
     `)
 scene.setBackgroundColor(15)
 bossAlive = 1
+bossFight()
 game.onUpdate(function () {
     if (current_weapon == 1) {
-        _player.setImage(assets.image`player_sword`)
+        if (isLifesteal == 0) {
+            _player.setImage(assets.image`player_sword`)
+        } else if (isLifesteal == 1) {
+            _player.setImage(assets.image`player_swordlifesteal`)
+        }
     } else if (current_weapon == 0) {
         _player.setImage(assets.image`player_gun1`)
     }
@@ -745,7 +781,7 @@ game.onUpdateInterval(5000, function () {
                         2 2 2 2 2 2 
                         `, SpriteKind.enemyProjectile)
                     bossbullet.setPosition(eyeboss.x, eyeboss.y)
-                    bossbullet.setVelocity(-120, randint(-10, 10))
+                    bossbullet.setVelocity(-120, randint(-30, 30))
                     bossbullet.setFlag(SpriteFlag.AutoDestroy, true)
                 }
                 eyeboss.setImage(img`
@@ -869,7 +905,7 @@ game.onUpdateInterval(5000, function () {
     }
 })
 game.onUpdateInterval(5000, function () {
-    if (bossAlive == 1) {
+    if (bossAlive == 1 && playerbar.value < 10) {
         medpack = sprites.create(img`
             . 1 1 1 1 1 1 1 1 . 
             1 d d d 2 2 d d d 1 
@@ -886,88 +922,133 @@ game.onUpdateInterval(5000, function () {
     }
 })
 game.onUpdateInterval(5000, function () {
-    statusbar.value += 1
+    playerbar.value += 1
     flashcooldown = 0
     sprites.destroyAllSpritesOfKind(SpriteKind.Enemy)
     currentenemies = 0
 })
 game.onUpdateInterval(2000, function () {
+    if (bossAlive == 1 && playerbar.value < 10) {
+        if (current_weapon == 0) {
+            ammopowerup = sprites.create(img`
+                . d d d d d d . 
+                . 7 7 7 7 7 7 . 
+                . 4 5 4 5 4 5 . 
+                . 4 5 4 5 4 5 . 
+                . 4 5 4 5 4 5 . 
+                . . . . . . . . 
+                `, SpriteKind.ammoBox)
+            ammopowerup.setFlag(SpriteFlag.AutoDestroy, true)
+            ammopowerup.setPosition(155, randint(0, 120))
+            ammopowerup.setVelocity(-50, 0)
+        } else if (current_weapon == 1) {
+            ammopowerup = sprites.create(img`
+                . . . 1 . . 
+                . . 1 4 b . 
+                . 1 4 2 b . 
+                . 1 4 2 b . 
+                1 4 2 2 2 b 
+                1 4 2 2 2 b 
+                . 1 2 2 2 b 
+                . . b b b . 
+                `, SpriteKind.lifestealdrop)
+            ammopowerup.setFlag(SpriteFlag.AutoDestroy, true)
+            ammopowerup.setPosition(155, randint(0, 120))
+            ammopowerup.setVelocity(-50, 0)
+        }
+    }
+})
+game.onUpdateInterval(2000, function () {
     if (0 < initenemies) {
         if (currentenemies > 0) {
             for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
-                for (let index = 0; index < 2; index++) {
-                    enemylaser = sprites.create(img`
-                        3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-                        3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-                        3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-                        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
-                        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
-                        3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-                        3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-                        3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-                        `, SpriteKind.enemyProjectile)
-                    enemylaser.setPosition(value.x, value.y)
-                    enemylaser.setVelocity(randint(-100, -150), 0)
-                    enemylaser.setFlag(SpriteFlag.AutoDestroy, true)
-                }
+                enemylaser = sprites.create(img`
+                    3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+                    3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                    `, SpriteKind.enemyProjectile)
+                enemylaser.setPosition(value.x, value.y)
+                enemylaser.setVelocity(randint(-100, -150), 0)
+                enemylaser.setFlag(SpriteFlag.AutoDestroy, true)
             }
         }
     }
 })
 game.onUpdateInterval(1500, function () {
     if (current_weapon == 0) {
-        for (let index = 0; index < 6; index++) {
+        for (let index = 0; index < starscatterProjectileNumber; index++) {
             bullet = sprites.createProjectileFromSprite(img`
                 . 1 . 
                 1 1 1 
                 . 1 . 
-                `, _player, randint(50, 80), randint(-15, 15))
+                `, _player, randint(80, 100), randint(-15, 15))
             bullet.setFlag(SpriteFlag.AutoDestroy, true)
         }
     }
 })
 game.onUpdateInterval(450, function () {
     if (current_weapon == 1) {
-        bullet = sprites.createProjectileFromSprite(img`
-            1 8 . . . . . . . 
-            1 9 8 . . . . . . 
-            . 1 9 8 8 . . . . 
-            . . 1 1 9 8 . . . 
-            . . . 1 9 9 8 . . 
-            . . . . 1 9 8 . . 
-            . . . . 1 9 8 . . 
-            . . . . 1 9 8 . . 
-            . . . . . 1 9 8 . 
-            . . . . . 1 9 8 . 
-            . . . . . 1 9 8 . 
-            . . . . 1 9 8 . . 
-            . . . 1 9 9 8 . . 
-            . . 1 1 9 8 . . . 
-            . 1 9 9 8 . . . . 
-            1 9 8 . . . . . . 
-            `, _player, 46, 0)
-        bullet.setFlag(SpriteFlag.AutoDestroy, true)
-        timer.background(function () {
-            pause(200)
+        if (isLifesteal == 1) {
+            timer.background(function () {
+                bullet = sprites.createProjectileFromSprite(img`
+                    . . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . 2 2 
+                    . . . . . . . . . . . . . . . . 4 4 2 
+                    . . . . . . . . . . . . . . . . 4 2 2 
+                    . . . . . . . . . . . . . . 4 4 4 2 . 
+                    . . . . . . . . . . 4 4 4 4 4 2 2 2 . 
+                    . . . . 4 4 4 4 4 4 4 2 2 2 2 2 . . . 
+                    . . . . 2 2 2 2 2 2 2 2 . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . . 
+                    . . . . . . . . . . . . . . . . . . . 
+                    `, _player, 46, 0)
+                bullet.setFlag(SpriteFlag.AutoDestroy, true)
+            })
+            timer.after(150, function () {
+                sprites.destroy(bullet)
+            })
+        } else if (isLifesteal == 0) {
             bullet = sprites.createProjectileFromSprite(img`
-                . . . . . . . 1 . 
-                . . . . . . 1 9 8 
-                . . . . . . 1 9 8 
-                . . . . . . 1 9 8 
-                . . . . . . 1 9 8 
-                . . . . . . 1 9 8 
-                . . . . . . 1 9 8 
+                1 8 . . . . . . . 
+                1 9 8 . . . . . . 
+                . 1 9 8 8 . . . . 
+                . . 1 1 9 8 . . . 
+                . . . 1 9 9 8 . . 
+                . . . . 1 9 8 . . 
+                . . . . 1 9 8 . . 
+                . . . . 1 9 8 . . 
                 . . . . . 1 9 8 . 
-                . . . 1 1 9 8 8 . 
-                . 1 1 9 9 8 . . . 
-                1 9 9 8 8 . . . . 
-                . 8 8 . . . . . . 
+                . . . . . 1 9 8 . 
+                . . . . . 1 9 8 . 
+                . . . . 1 9 8 . . 
+                . . . 1 9 9 8 . . 
+                . . 1 1 9 8 . . . 
+                . 1 9 9 8 . . . . 
+                1 9 8 . . . . . . 
                 `, _player, 46, 0)
             bullet.setFlag(SpriteFlag.AutoDestroy, true)
-        })
-        timer.after(150, function () {
-            sprites.destroy(bullet)
-        })
+            timer.background(function () {
+                pause(200)
+                bullet = sprites.createProjectileFromSprite(img`
+                    . . . . . . . 1 . 
+                    . . . . . . 1 9 8 
+                    . . . . . . 1 9 8 
+                    . . . . . . 1 9 8 
+                    . . . . . . 1 9 8 
+                    . . . . . . 1 9 8 
+                    . . . . . . 1 9 8 
+                    . . . . . 1 9 8 . 
+                    . . . 1 1 9 8 8 . 
+                    . 1 1 9 9 8 . . . 
+                    1 9 9 8 8 . . . . 
+                    . 8 8 . . . . . . 
+                    `, _player, 46, 0)
+                bullet.setFlag(SpriteFlag.AutoDestroy, true)
+            })
+            timer.after(150, function () {
+                sprites.destroy(bullet)
+            })
+        }
     }
 })
 game.onUpdateInterval(500, function () {
