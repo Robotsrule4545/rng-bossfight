@@ -42,7 +42,7 @@ sprites.onOverlap(SpriteKind.boss, SpriteKind.Projectile, function (sprite, othe
         if (isSunAvatar == 0) {
             bossStatusBar.value += -1
         } else if (isSunAvatar == 1) {
-            bossStatusBar.value += -2
+            bossStatusBar.value += -20
         }
     } else if (current_weapon == 1) {
         if (isLifesteal == 0) {
@@ -189,15 +189,17 @@ statusbars.onZero(StatusBarKind.Health, function (status) {
     game.gameOver(false)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.lifestealdrop, function (sprite, otherSprite) {
+    if (isLifesteal == 0) {
+        playerbar.max = 15
+        playerbar.value += -3
+        timer.background(function () {
+            isLifesteal = 1
+            slashSpeed = 200
+        })
+    } else if (isLifesteal == 1) {
+        playerbar.value += 5
+    }
     sprites.destroy(otherSprite)
-    playerbar.value += -3
-    timer.background(function () {
-        isLifesteal = 1
-        slashSpeed = 200
-        pause(10000)
-        slashSpeed = 450
-        isLifesteal = 0
-    })
 })
 function flashScreen () {
     if (flashcooldown == 0) {
@@ -572,6 +574,8 @@ let currentenemies = 0
 let medpack: Sprite = null
 let altar: Sprite = null
 let sunAvatarRng = 0
+let ton2: Sprite = null
+let ton1: Sprite = null
 let bossbullet: Sprite = null
 let flag: Sprite = null
 let generatedFinish = 0
@@ -738,6 +742,7 @@ scene.setBackgroundImage(img`
     `)
 scene.setBackgroundColor(15)
 bossAlive = 1
+bossFight()
 game.onUpdate(function () {
     if (current_weapon == 1) {
         if (isLifesteal == 0) {
@@ -935,6 +940,34 @@ game.onUpdateInterval(5000, function () {
                     ...fffffffffffff
                     ...fffffffffffff
                     `)
+                for (let index = 0; index < 2; index++) {
+                    ton1 = sprites.create(img`
+                        b b b b b b b b b b b b b b b 
+                        b c c c c c c c c c c c c c b 
+                        . c d d d c d d d c d d d c . 
+                        . c c d c c d c d c d c d c . 
+                        . c c d c c d c d c d c d c . 
+                        . c c d c c d d d c d c d c . 
+                        b c c c c c c c c c c c c c b 
+                        b b b b b b b b b b b b b b b 
+                        `, SpriteKind.killbrick)
+                    ton1.setPosition(eyeboss.x, eyeboss.y)
+                    ton1.setFlag(SpriteFlag.AutoDestroy, true)
+                    ton1.setVelocity(0, 50)
+                    ton2 = sprites.create(img`
+                        b b b b b b b b b b b b b b b 
+                        b c c c c c c c c c c c c c b 
+                        . c d d d c d d d c d d d c . 
+                        . c c d c c d c d c d c d c . 
+                        . c c d c c d c d c d c d c . 
+                        . c c d c c d d d c d c d c . 
+                        b c c c c c c c c c c c c c b 
+                        b b b b b b b b b b b b b b b 
+                        `, SpriteKind.killbrick)
+                    ton2.setPosition(eyeboss.x, eyeboss.y)
+                    ton2.setFlag(SpriteFlag.AutoDestroy, true)
+                    ton2.setVelocity(0, -50)
+                }
             })
         }
     }
@@ -942,7 +975,7 @@ game.onUpdateInterval(5000, function () {
 game.onUpdateInterval(5000, function () {
     if (altarClaimed == 0) {
         sunAvatarRng = randint(0, 100)
-        if (sunAvatarRng <= 5) {
+        if (sunAvatarRng == 1) {
             altar = sprites.create(assets.image`sunaltar`, SpriteKind.sunaltar)
             altar.setPosition(155, randint(0, 110))
             altar.setVelocity(-30, 0)
@@ -975,7 +1008,7 @@ game.onUpdateInterval(5000, function () {
     currentenemies = 0
 })
 game.onUpdateInterval(2000, function () {
-    if (bossAlive == 1 && playerbar.value < 10) {
+    if (bossAlive == 1) {
         if (isSunAvatar == 0) {
             if (current_weapon == 0) {
                 ammopowerup = sprites.create(img`
@@ -1023,134 +1056,136 @@ game.onUpdateInterval(2000, function () {
         }
     }
 })
-game.onUpdateInterval(1000, function () {
+game.onUpdateInterval(2000, function () {
     if (isSunAvatar == 1) {
-        sunbeam1 = sprites.createProjectileFromSprite(img`
-            . . . . . . . . . . . . . . . . 
-            . . . . . 5 . 5 . 5 . 5 . . . . 
-            . 5 . . . 5 . 5 . 5 . 5 . . 5 . 
-            . . 5 . . . . . . . . . . 5 . . 
-            . . . . 5 5 5 5 5 5 5 5 . . . . 
-            . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
-            . . . . 5 5 4 4 4 4 5 5 . . . . 
-            . 5 5 . 5 5 4 4 4 4 5 5 . 5 5 . 
-            . . . . 5 5 4 4 5 5 5 5 . . . . 
-            . 5 5 . 5 5 4 4 5 5 5 5 . 5 5 . 
-            . . . . 5 5 5 5 5 5 5 5 . . . . 
-            . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
-            . . . . . . . . . . . . . . . . 
-            . . . 5 . 5 . 5 . 5 . 5 . 5 . . 
-            . . 5 . . 5 . 5 . 5 . 5 . . 5 . 
-            . . . . . . . . . . . . . . . . 
-            `, _player, 100, -45)
-        sunbeam1.setFlag(SpriteFlag.AutoDestroy, true)
-        sunbeam2 = sprites.createProjectileFromSprite(img`
-            . . . . . . . . . . . . . . . . 
-            . . . . . 5 . 5 . 5 . 5 . . . . 
-            . 5 . . . 5 . 5 . 5 . 5 . . 5 . 
-            . . 5 . . . . . . . . . . 5 . . 
-            . . . . 5 5 5 5 5 5 5 5 . . . . 
-            . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
-            . . . . 5 5 4 4 4 4 5 5 . . . . 
-            . 5 5 . 5 5 4 4 4 4 5 5 . 5 5 . 
-            . . . . 5 5 4 4 5 5 5 5 . . . . 
-            . 5 5 . 5 5 4 4 5 5 5 5 . 5 5 . 
-            . . . . 5 5 5 5 5 5 5 5 . . . . 
-            . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
-            . . . . . . . . . . . . . . . . 
-            . . . 5 . 5 . 5 . 5 . 5 . 5 . . 
-            . . 5 . . 5 . 5 . 5 . 5 . . 5 . 
-            . . . . . . . . . . . . . . . . 
-            `, _player, 100, 0)
-        sunbeam2.setFlag(SpriteFlag.AutoDestroy, true)
-        sunbeam3 = sprites.createProjectileFromSprite(img`
-            . . . . . . . . . . . . . . . . 
-            . . . . . 5 . 5 . 5 . 5 . . . . 
-            . 5 . . . 5 . 5 . 5 . 5 . . 5 . 
-            . . 5 . . . . . . . . . . 5 . . 
-            . . . . 5 5 5 5 5 5 5 5 . . . . 
-            . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
-            . . . . 5 5 4 4 4 4 5 5 . . . . 
-            . 5 5 . 5 5 4 4 4 4 5 5 . 5 5 . 
-            . . . . 5 5 4 4 5 5 5 5 . . . . 
-            . 5 5 . 5 5 4 4 5 5 5 5 . 5 5 . 
-            . . . . 5 5 5 5 5 5 5 5 . . . . 
-            . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
-            . . . . . . . . . . . . . . . . 
-            . . . 5 . 5 . 5 . 5 . 5 . 5 . . 
-            . . 5 . . 5 . 5 . 5 . 5 . . 5 . 
-            . . . . . . . . . . . . . . . . 
-            `, _player, 100, 45)
-        sunbeam3.setFlag(SpriteFlag.AutoDestroy, true)
-        sunstorm = sprites.create(img`
-            ................
-            ..........55555.
-            ..5555555...445.
-            .....5445....55.
-            ......555.......
-            ................
-            ................
-            ....5555555555..
-            555....5444445..
-            445.....555445..
-            555.......5555..
-            ................
-            .......55.......
-            .555555445......
-            ..54444445......
-            ...5544445......
-            .....55445......
-            .......55.......
-            ................
-            ................
-            ......5555555...
-            .........5445...
-            ..........555...
-            ................
-            55555555........
-            .5444445........
-            ..555445........
-            ....5555..5555..
-            ............45..
-            ................
-            ................
-            ................
-            ................
-            ..........55555.
-            ..5555555...445.
-            .....5445....55.
-            ......555.......
-            ................
-            ................
-            ....5555555555..
-            555....5444445..
-            445.....555445..
-            555.......5555..
-            ................
-            .......55.......
-            .555555445......
-            ..54444445......
-            ...5544445......
-            .....55445......
-            .......55.......
-            ................
-            ................
-            ......5555555...
-            .........5445...
-            ..........555...
-            ................
-            55555555........
-            .5444445........
-            ..555445........
-            ....5555..5555..
-            ............45..
-            ................
-            ................
-            ................
-            `, SpriteKind.Projectile)
-        sunstorm.setFlag(SpriteFlag.AutoDestroy, true)
-        sunstorm.setPosition(10, _player.y)
-        sunstorm.setVelocity(100, 0)
+        if (current_weapon == 0) {
+            sunbeam1 = sprites.createProjectileFromSprite(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . 5 . 5 . 5 . 5 . . . . 
+                . 5 . . . 5 . 5 . 5 . 5 . . 5 . 
+                . . 5 . . . . . . . . . . 5 . . 
+                . . . . 5 5 5 5 5 5 5 5 . . . . 
+                . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
+                . . . . 5 5 4 4 4 4 5 5 . . . . 
+                . 5 5 . 5 5 4 4 4 4 5 5 . 5 5 . 
+                . . . . 5 5 4 4 5 5 5 5 . . . . 
+                . 5 5 . 5 5 4 4 5 5 5 5 . 5 5 . 
+                . . . . 5 5 5 5 5 5 5 5 . . . . 
+                . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
+                . . . . . . . . . . . . . . . . 
+                . . . 5 . 5 . 5 . 5 . 5 . 5 . . 
+                . . 5 . . 5 . 5 . 5 . 5 . . 5 . 
+                . . . . . . . . . . . . . . . . 
+                `, _player, 100, -45)
+            sunbeam1.setFlag(SpriteFlag.AutoDestroy, true)
+            sunbeam2 = sprites.createProjectileFromSprite(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . 5 . 5 . 5 . 5 . . . . 
+                . 5 . . . 5 . 5 . 5 . 5 . . 5 . 
+                . . 5 . . . . . . . . . . 5 . . 
+                . . . . 5 5 5 5 5 5 5 5 . . . . 
+                . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
+                . . . . 5 5 4 4 4 4 5 5 . . . . 
+                . 5 5 . 5 5 4 4 4 4 5 5 . 5 5 . 
+                . . . . 5 5 4 4 5 5 5 5 . . . . 
+                . 5 5 . 5 5 4 4 5 5 5 5 . 5 5 . 
+                . . . . 5 5 5 5 5 5 5 5 . . . . 
+                . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
+                . . . . . . . . . . . . . . . . 
+                . . . 5 . 5 . 5 . 5 . 5 . 5 . . 
+                . . 5 . . 5 . 5 . 5 . 5 . . 5 . 
+                . . . . . . . . . . . . . . . . 
+                `, _player, 100, 0)
+            sunbeam2.setFlag(SpriteFlag.AutoDestroy, true)
+            sunbeam3 = sprites.createProjectileFromSprite(img`
+                . . . . . . . . . . . . . . . . 
+                . . . . . 5 . 5 . 5 . 5 . . . . 
+                . 5 . . . 5 . 5 . 5 . 5 . . 5 . 
+                . . 5 . . . . . . . . . . 5 . . 
+                . . . . 5 5 5 5 5 5 5 5 . . . . 
+                . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
+                . . . . 5 5 4 4 4 4 5 5 . . . . 
+                . 5 5 . 5 5 4 4 4 4 5 5 . 5 5 . 
+                . . . . 5 5 4 4 5 5 5 5 . . . . 
+                . 5 5 . 5 5 4 4 5 5 5 5 . 5 5 . 
+                . . . . 5 5 5 5 5 5 5 5 . . . . 
+                . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
+                . . . . . . . . . . . . . . . . 
+                . . . 5 . 5 . 5 . 5 . 5 . 5 . . 
+                . . 5 . . 5 . 5 . 5 . 5 . . 5 . 
+                . . . . . . . . . . . . . . . . 
+                `, _player, 100, 45)
+            sunbeam3.setFlag(SpriteFlag.AutoDestroy, true)
+            sunstorm = sprites.create(img`
+                ................
+                ..........55555.
+                ..5555555...445.
+                .....5445....55.
+                ......555.......
+                ................
+                ................
+                ....5555555555..
+                555....5444445..
+                445.....555445..
+                555.......5555..
+                ................
+                .......55.......
+                .555555445......
+                ..54444445......
+                ...5544445......
+                .....55445......
+                .......55.......
+                ................
+                ................
+                ......5555555...
+                .........5445...
+                ..........555...
+                ................
+                55555555........
+                .5444445........
+                ..555445........
+                ....5555..5555..
+                ............45..
+                ................
+                ................
+                ................
+                ................
+                ..........55555.
+                ..5555555...445.
+                .....5445....55.
+                ......555.......
+                ................
+                ................
+                ....5555555555..
+                555....5444445..
+                445.....555445..
+                555.......5555..
+                ................
+                .......55.......
+                .555555445......
+                ..54444445......
+                ...5544445......
+                .....55445......
+                .......55.......
+                ................
+                ................
+                ......5555555...
+                .........5445...
+                ..........555...
+                ................
+                55555555........
+                .5444445........
+                ..555445........
+                ....5555..5555..
+                ............45..
+                ................
+                ................
+                ................
+                `, SpriteKind.Projectile)
+            sunstorm.setFlag(SpriteFlag.AutoDestroy, true)
+            sunstorm.setPosition(10, _player.y)
+            sunstorm.setVelocity(100, 0)
+        }
     }
 })
 game.onUpdateInterval(1500, function () {
