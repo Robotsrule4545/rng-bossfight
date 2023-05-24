@@ -8,6 +8,8 @@ namespace SpriteKind {
     export const flash = SpriteKind.create()
     export const finish = SpriteKind.create()
     export const homingEnemyProjectile = SpriteKind.create()
+    export const powerup = SpriteKind.create()
+    export const medpack = SpriteKind.create()
 }
 sprites.onOverlap(SpriteKind.boss, SpriteKind.Projectile, function (sprite, otherSprite) {
     if (current_weapon == 0) {
@@ -473,6 +475,16 @@ sprites.onCreated(SpriteKind.flash, function (sprite) {
         sprites.destroy(sprite)
     })
 })
+sprites.onOverlap(SpriteKind.Player, SpriteKind.medpack, function (sprite, otherSprite) {
+    sprites.destroy(otherSprite)
+    statusbar.value += 1
+    timer.background(function () {
+        for (let index = 0; index < 3; index++) {
+            pause(1000)
+            statusbar.value += 1
+        }
+    })
+})
 sprites.onOverlap(SpriteKind.Player, SpriteKind.bossShard, function (sprite, otherSprite) {
     bossShards += 1
     sprites.destroy(otherSprite, effects.clouds, 500)
@@ -495,14 +507,15 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.bossShard, function (sprite, oth
  * 
  * - Shoot the mini-eyes that spawn on the side to get points!
  */
+let currentEnemy: Sprite = null
 let enemyRNG = 0
 let currentPlatform: Sprite = null
 let platformRNG = 0
 let bullet: Sprite = null
-let currentEnemy: Sprite = null
 let enemylaser: Sprite = null
 let initenemies = 0
 let currentenemies = 0
+let medpack: Sprite = null
 let bossbullet: Sprite = null
 let flag: Sprite = null
 let generatedFinish = 0
@@ -714,6 +727,8 @@ game.onUpdateInterval(5000, function () {
                     2 2 2 
                     2 2 2 
                     2 2 2 
+                    2 2 2 
+                    2 2 2 
                     `, SpriteKind.enemyProjectile)
                 bossbullet.setPosition(eyeboss.x, eyeboss.y)
                 bossbullet.setVelocity(-40, randint(-40, 40))
@@ -851,6 +866,21 @@ game.onUpdateInterval(5000, function () {
     }
 })
 game.onUpdateInterval(5000, function () {
+    medpack = sprites.create(img`
+        . 1 1 1 1 1 1 1 1 . 
+        1 d d d 2 2 d d d 1 
+        1 d d 2 2 2 2 d d 1 
+        1 d d 2 2 2 2 d d 1 
+        1 d d d 2 2 d d d 1 
+        . 1 1 1 1 1 1 1 1 . 
+        . . . . . . . . . . 
+        . 9 9 9 9 9 9 9 9 . 
+        `, SpriteKind.medpack)
+    medpack.setFlag(SpriteFlag.AutoDestroy, true)
+    medpack.setPosition(155, randint(0, 120))
+    medpack.setVelocity(-50, 0)
+})
+game.onUpdateInterval(5000, function () {
     statusbar.value += 1
     flashcooldown = 0
     sprites.destroyAllSpritesOfKind(SpriteKind.Enemy)
@@ -859,20 +889,22 @@ game.onUpdateInterval(5000, function () {
 game.onUpdateInterval(2000, function () {
     if (0 < initenemies) {
         if (currentenemies > 0) {
-            for (let index = 0; index < 2; index++) {
-                enemylaser = sprites.create(img`
-                    3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-                    3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-                    3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-                    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
-                    1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
-                    3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-                    3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-                    3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
-                    `, SpriteKind.enemyProjectile)
-                enemylaser.setPosition(currentEnemy.x, currentEnemy.y)
-                enemylaser.setVelocity(randint(-100, -150), 0)
-                enemylaser.setFlag(SpriteFlag.AutoDestroy, true)
+            for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
+                for (let index = 0; index < 2; index++) {
+                    enemylaser = sprites.create(img`
+                        3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                        3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                        3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+                        1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
+                        3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                        3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                        3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
+                        `, SpriteKind.enemyProjectile)
+                    enemylaser.setPosition(value.x, value.y)
+                    enemylaser.setVelocity(randint(-100, -150), 0)
+                    enemylaser.setFlag(SpriteFlag.AutoDestroy, true)
+                }
             }
         }
     }
