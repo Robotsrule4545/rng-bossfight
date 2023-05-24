@@ -7,24 +7,8 @@ namespace SpriteKind {
     export const boss = SpriteKind.create()
     export const flash = SpriteKind.create()
     export const finish = SpriteKind.create()
+    export const homingEnemyProjectile = SpriteKind.create()
 }
-/**
- * HOW TO PLAY:
- * 
- * - A and D to move back and forth
- * 
- * - Space to jump!
- * 
- * - E to switch weapon!
- * 
- * - Sword can half damage dealt to you(reflect lasers)
- * 
- * - Collect 4 or more shards to summon the boss!
- * 
- * - The boss has a one-shot attack, beware when it turns purple!
- * 
- * - Shoot the mini-eyes that spawn on the side to get points!
- */
 sprites.onOverlap(SpriteKind.boss, SpriteKind.Projectile, function (sprite, otherSprite) {
     if (current_weapon == 0) {
         bossStatusBar.value += -1
@@ -38,8 +22,8 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite5, ot
     sprites.destroy(otherSprite4, effects.fire, 500)
     info.changeScoreBy(1)
     shardDropChance = randint(1, 10)
-    if (game.runtime() > 7000) {
-        if (shardDropChance >= 2) {
+    if (game.runtime() > 10000) {
+        if (shardDropChance >= 1) {
             shard = sprites.create(img`
                 . . . . . . 1 1 
                 . . . 1 1 1 3 1 
@@ -59,6 +43,16 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite5, ot
         sprites.destroy(otherSprite4, effects.fire, 500)
         info.changeScoreBy(1)
         shardDropChance = randint(0, 3)
+    }
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.killbrick, function (sprite, otherSprite) {
+    if (current_weapon == 0) {
+        sprites.destroy(otherSprite)
+        sprites.destroy(sprite)
+        game.gameOver(false)
+    } else if (current_weapon == 1) {
+        sprites.destroy(otherSprite, effects.starField, 1000)
+        statusbar.value = 1
     }
 })
 sprites.onOverlap(SpriteKind.enemyProjectile, SpriteKind.Player, function (sprite, otherSprite) {
@@ -460,7 +454,7 @@ function flashScreen () {
                 `, SpriteKind.flash)
             pause(50)
             sprites.destroy(flash)
-            pause(500)
+            pause(100)
         }
         sprites.destroy(flash)
         flashcooldown = 1
@@ -484,6 +478,23 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.bossShard, function (sprite, oth
     sprites.destroy(otherSprite, effects.clouds, 500)
     flashScreen()
 })
+/**
+ * HOW TO PLAY:
+ * 
+ * - A and D to move back and forth
+ * 
+ * - Space to jump!
+ * 
+ * - E to switch weapon!
+ * 
+ * - Sword can half damage dealt to you(reflect lasers)
+ * 
+ * - Collect 4 or more shards to summon the boss!
+ * 
+ * - The boss has a one-shot attack, beware when it turns purple!
+ * 
+ * - Shoot the mini-eyes that spawn on the side to get points!
+ */
 let enemyRNG = 0
 let currentPlatform: Sprite = null
 let platformRNG = 0
@@ -491,8 +502,8 @@ let bullet: Sprite = null
 let currentEnemy: Sprite = null
 let enemylaser: Sprite = null
 let initenemies = 0
-let bossbullet: Sprite = null
 let currentenemies = 0
+let bossbullet: Sprite = null
 let flag: Sprite = null
 let generatedFinish = 0
 let flash: Sprite = null
@@ -651,6 +662,7 @@ scene.setBackgroundImage(img`
     `)
 scene.setBackgroundColor(15)
 bossAlive = 1
+bossFight()
 game.onUpdate(function () {
     if (current_weapon == 1) {
         _player.setImage(assets.image`player_sword`)
@@ -659,13 +671,14 @@ game.onUpdate(function () {
     }
 })
 game.onUpdate(function () {
-    if (bossShards >= 4 && info.score() >= 20) {
+    if (bossShards >= 4 && info.score() >= 10) {
         bossShards = 0
         bossFight()
     }
     if (bossAlive == 0) {
         timer.after(2000, function () {
             if (generatedFinish == 0) {
+                info.changeScoreBy(50)
                 scroller.scrollBackgroundWithSpeed(0, 0)
                 flag = sprites.create(img`
                     . . . . . . . . . . . . . . . . 
@@ -692,15 +705,9 @@ game.onUpdate(function () {
     }
 })
 game.onUpdateInterval(5000, function () {
-    statusbar.value += 1
-    flashcooldown = 0
-    sprites.destroyAllSpritesOfKind(SpriteKind.Enemy)
-    currentenemies = 0
-})
-game.onUpdateInterval(5000, function () {
     if (bossonscreen == 1) {
         if (bossAlive == 1) {
-            for (let index = 0; index < 5; index++) {
+            for (let index = 0; index < 10; index++) {
                 bossbullet = sprites.create(img`
                     2 2 2 
                     2 2 2 
@@ -713,15 +720,16 @@ game.onUpdateInterval(5000, function () {
                 bossbullet.setVelocity(-40, randint(-40, 40))
                 bossbullet.setFlag(SpriteFlag.AutoDestroy, true)
             }
-            timer.after(2000, function () {
-                for (let index = 0; index < 5; index++) {
+            timer.background(function () {
+                pause(2000)
+                for (let index = 0; index < 10; index++) {
                     bossbullet = sprites.create(img`
                         2 2 2 2 2 2 
                         2 2 2 2 2 2 
                         2 2 2 2 2 2 
                         `, SpriteKind.enemyProjectile)
                     bossbullet.setPosition(eyeboss.x, eyeboss.y)
-                    bossbullet.setVelocity(-60, randint(-10, 10))
+                    bossbullet.setVelocity(-120, randint(-10, 10))
                     bossbullet.setFlag(SpriteFlag.AutoDestroy, true)
                 }
                 eyeboss.setImage(img`
@@ -759,8 +767,7 @@ game.onUpdateInterval(5000, function () {
                     ...aaaaaaaaaaaaa
                     ...aaaaaaaaaaaaa
                     `)
-            })
-            timer.after(5000, function () {
+                pause(5000)
                 for (let index = 0; index < 3; index++) {
                     scene.cameraShake(8, 500)
                     bossbullet = sprites.create(img`
@@ -797,7 +804,7 @@ game.onUpdateInterval(5000, function () {
                         ........................................................................................................................
                         ........................................................................................................................
                         ........................................................................................................................
-                        `, SpriteKind.enemyProjectile)
+                        `, SpriteKind.killbrick)
                     bossbullet.setPosition(eyeboss.x, eyeboss.y)
                     bossbullet.setVelocity(-300, randint(-50, 50))
                     bossbullet.setFlag(SpriteFlag.AutoDestroy, true)
@@ -838,24 +845,14 @@ game.onUpdateInterval(5000, function () {
                     ...fffffffffffff
                     `)
             })
-            timer.after(5000, function () {
-                bossbullet = sprites.create(img`
-                    c b b d 
-                    c a a d 
-                    c a a b 
-                    c c c c 
-                    `, SpriteKind.enemyProjectile)
-                bossbullet.setFlag(SpriteFlag.AutoDestroy, true)
-                bossbullet.startEffect(effects.trail, 5000)
-                bossbullet.setPosition(eyeboss.x, eyeboss.y)
-                bossbullet.follow(_player, 100)
-                timer.after(500, function () {
-                    bossbullet.setVelocity(0, 0)
-                    sprites.destroy(bossbullet, effects.spray, 500)
-                })
-            })
         }
     }
+})
+game.onUpdateInterval(5000, function () {
+    statusbar.value += 1
+    flashcooldown = 0
+    sprites.destroyAllSpritesOfKind(SpriteKind.Enemy)
+    currentenemies = 0
 })
 game.onUpdateInterval(2000, function () {
     if (0 < initenemies) {
@@ -888,6 +885,50 @@ game.onUpdateInterval(1500, function () {
                 `, _player, randint(50, 80), randint(-15, 15))
             bullet.setFlag(SpriteFlag.AutoDestroy, true)
         }
+    }
+})
+game.onUpdateInterval(450, function () {
+    if (current_weapon == 1) {
+        bullet = sprites.createProjectileFromSprite(img`
+            1 8 . . . . . . . 
+            1 9 8 . . . . . . 
+            . 1 9 8 8 . . . . 
+            . . 1 1 9 8 . . . 
+            . . . 1 9 9 8 . . 
+            . . . . 1 9 8 . . 
+            . . . . 1 9 8 . . 
+            . . . . 1 9 8 . . 
+            . . . . . 1 9 8 . 
+            . . . . . 1 9 8 . 
+            . . . . . 1 9 8 . 
+            . . . . 1 9 8 . . 
+            . . . 1 9 9 8 . . 
+            . . 1 1 9 8 . . . 
+            . 1 9 9 8 . . . . 
+            1 9 8 . . . . . . 
+            `, _player, 46, 0)
+        bullet.setFlag(SpriteFlag.AutoDestroy, true)
+        timer.background(function () {
+            pause(200)
+            bullet = sprites.createProjectileFromSprite(img`
+                . . . . . . . 1 . 
+                . . . . . . 1 9 8 
+                . . . . . . 1 9 8 
+                . . . . . . 1 9 8 
+                . . . . . . 1 9 8 
+                . . . . . . 1 9 8 
+                . . . . . . 1 9 8 
+                . . . . . 1 9 8 . 
+                . . . 1 1 9 8 8 . 
+                . 1 1 9 9 8 . . . 
+                1 9 9 8 8 . . . . 
+                . 8 8 . . . . . . 
+                `, _player, 46, 0)
+            bullet.setFlag(SpriteFlag.AutoDestroy, true)
+        })
+        timer.after(150, function () {
+            sprites.destroy(bullet)
+        })
     }
 })
 game.onUpdateInterval(500, function () {
@@ -968,48 +1009,4 @@ game.onUpdateInterval(500, function () {
 })
 game.onUpdateInterval(500, function () {
     cooldown = 0
-})
-game.onUpdateInterval(300, function () {
-    if (current_weapon == 1) {
-        bullet = sprites.createProjectileFromSprite(img`
-            1 8 . . . . . . . 
-            1 9 8 . . . . . . 
-            . 1 9 8 8 . . . . 
-            . . 1 1 9 8 . . . 
-            . . . 1 9 9 8 . . 
-            . . . . 1 9 8 . . 
-            . . . . 1 9 8 . . 
-            . . . . 1 9 8 . . 
-            . . . . . 1 9 8 . 
-            . . . . . 1 9 8 . 
-            . . . . . 1 9 8 . 
-            . . . . 1 9 8 . . 
-            . . . 1 9 9 8 . . 
-            . . 1 1 9 8 . . . 
-            . 1 9 9 8 . . . . 
-            1 9 8 . . . . . . 
-            `, _player, 46, 0)
-        bullet.setFlag(SpriteFlag.AutoDestroy, true)
-        timer.background(function () {
-            pause(200)
-            bullet = sprites.createProjectileFromSprite(img`
-                . . . . . . . 1 . 
-                . . . . . . 1 9 8 
-                . . . . . . 1 9 8 
-                . . . . . . 1 9 8 
-                . . . . . . 1 9 8 
-                . . . . . . 1 9 8 
-                . . . . . . 1 9 8 
-                . . . . . 1 9 8 . 
-                . . . 1 1 9 8 8 . 
-                . 1 1 9 9 8 . . . 
-                1 9 9 8 8 . . . . 
-                . 8 8 . . . . . . 
-                `, _player, 46, 0)
-            bullet.setFlag(SpriteFlag.AutoDestroy, true)
-        })
-        timer.after(150, function () {
-            sprites.destroy(bullet)
-        })
-    }
 })
