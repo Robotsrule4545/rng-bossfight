@@ -81,7 +81,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 function bossFight () {
-    bossStatusBar = statusbars.create(120, 5, StatusBarKind.EnemyHealth)
+    bossStatusBar = statusbars.create(100, 5, StatusBarKind.EnemyHealth)
     bossStatusBar.setLabel("BOSS")
     bossStatusBar.setBarBorder(1, 4)
     bossStatusBar.setColor(2, 1)
@@ -125,7 +125,7 @@ function bossFight () {
         ...fffffffffffff
         `, SpriteKind.boss)
     eyeboss.changeScale(2, ScaleAnchor.Right)
-    eyeboss.setPosition(150, 60)
+    eyeboss.setPosition(150, 70)
     bossonscreen = 1
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -710,7 +710,7 @@ game.onUpdate(function () {
                     . . b f f f f f f f f f f b . . 
                     . b b f f f f f f f f f f b b . 
                     `, SpriteKind.finish)
-                flag.setPosition(148, 110)
+                flag.setPosition(150, 110)
                 generatedFinish = 1
             }
         })
@@ -719,7 +719,8 @@ game.onUpdate(function () {
 game.onUpdateInterval(5000, function () {
     if (bossonscreen == 1) {
         if (bossAlive == 1) {
-            for (let index = 0; index < 10; index++) {
+            eyeboss.sayText("walls")
+            for (let index = 0; index < 15; index++) {
                 bossbullet = sprites.create(img`
                     2 2 2 
                     2 2 2 
@@ -731,11 +732,12 @@ game.onUpdateInterval(5000, function () {
                     2 2 2 
                     `, SpriteKind.enemyProjectile)
                 bossbullet.setPosition(eyeboss.x, eyeboss.y)
-                bossbullet.setVelocity(-40, randint(-40, 40))
+                bossbullet.setVelocity(-40, randint(-80, 80))
                 bossbullet.setFlag(SpriteFlag.AutoDestroy, true)
             }
             timer.background(function () {
                 pause(2000)
+                eyeboss.sayText("boom")
                 for (let index = 0; index < 10; index++) {
                     bossbullet = sprites.create(img`
                         2 2 2 2 2 2 
@@ -784,6 +786,7 @@ game.onUpdateInterval(5000, function () {
                 pause(2000)
                 for (let index = 0; index < 2; index++) {
                     pause(2000)
+                    eyeboss.sayText("No")
                     for (let index = 0; index < 3; index++) {
                         scene.cameraShake(8, 500)
                         bossbullet = sprites.create(img`
@@ -866,19 +869,21 @@ game.onUpdateInterval(5000, function () {
     }
 })
 game.onUpdateInterval(5000, function () {
-    medpack = sprites.create(img`
-        . 1 1 1 1 1 1 1 1 . 
-        1 d d d 2 2 d d d 1 
-        1 d d 2 2 2 2 d d 1 
-        1 d d 2 2 2 2 d d 1 
-        1 d d d 2 2 d d d 1 
-        . 1 1 1 1 1 1 1 1 . 
-        . . . . . . . . . . 
-        . 9 9 9 9 9 9 9 9 . 
-        `, SpriteKind.medpack)
-    medpack.setFlag(SpriteFlag.AutoDestroy, true)
-    medpack.setPosition(155, randint(0, 120))
-    medpack.setVelocity(-50, 0)
+    if (bossAlive == 1) {
+        medpack = sprites.create(img`
+            . 1 1 1 1 1 1 1 1 . 
+            1 d d d 2 2 d d d 1 
+            1 d d 2 2 2 2 d d 1 
+            1 d d 2 2 2 2 d d 1 
+            1 d d d 2 2 d d d 1 
+            . 1 1 1 1 1 1 1 1 . 
+            . . . . . . . . . . 
+            . 9 9 9 9 9 9 9 9 . 
+            `, SpriteKind.medpack)
+        medpack.setFlag(SpriteFlag.AutoDestroy, true)
+        medpack.setPosition(155, randint(0, 120))
+        medpack.setVelocity(-50, 0)
+    }
 })
 game.onUpdateInterval(5000, function () {
     statusbar.value += 1
