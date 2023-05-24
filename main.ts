@@ -12,17 +12,44 @@ namespace SpriteKind {
     export const medpack = SpriteKind.create()
     export const ammoBox = SpriteKind.create()
     export const lifestealdrop = SpriteKind.create()
+    export const sunaltar = SpriteKind.create()
 }
+/**
+ * HOW TO PLAY:
+ * 
+ * - A and D to move back and forth
+ * 
+ * - Space to jump!
+ * 
+ * - E to switch weapon!
+ * 
+ * - Sword can half damage dealt to you(reflect lasers)
+ * 
+ * - Collect 4 or more shards to summon the boss!
+ * 
+ * - The boss has a one-shot attack, beware when it turns purple!
+ * 
+ * - Shoot the mini-eyes that spawn on the side to get points!
+ * 
+ * - Ammo boxes increase the amount of projectiles you fire.
+ * 
+ * - The blood drop turns you into a super damager, but you can't heal and it requires a health sacrifice. (-3 hp)
+ * 
+ * - Touch the elusive sun altar to channel the might of the sun!
+ */
 sprites.onOverlap(SpriteKind.boss, SpriteKind.Projectile, function (sprite, otherSprite) {
     if (current_weapon == 0) {
-        if (isLifesteal == 0) {
+        if (isSunAvatar == 0) {
             bossStatusBar.value += -1
-        } else if (isLifesteal == 1) {
-            bossStatusBar.value += -50
-            isLifesteal = 0
+        } else if (isSunAvatar == 1) {
+            bossStatusBar.value += -2
         }
     } else if (current_weapon == 1) {
-        bossStatusBar.value += -3
+        if (isLifesteal == 0) {
+            bossStatusBar.value += -3
+        } else if (isLifesteal == 1) {
+            bossStatusBar.value += -15
+        }
     }
     sprites.destroy(otherSprite)
 })
@@ -56,9 +83,14 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite5, ot
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.killbrick, function (sprite, otherSprite) {
     if (current_weapon == 0) {
-        sprites.destroy(otherSprite)
-        sprites.destroy(sprite)
-        game.gameOver(false)
+        if (isSunAvatar == 0) {
+            sprites.destroy(otherSprite)
+            sprites.destroy(sprite)
+            game.gameOver(false)
+        } else if (isSunAvatar == 1) {
+            sprites.destroy(otherSprite, effects.starField, 1000)
+            playerbar.value = 2
+        }
     } else if (current_weapon == 1) {
         sprites.destroy(otherSprite, effects.starField, 1000)
         playerbar.value = 1
@@ -137,7 +169,7 @@ function bossFight () {
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     if (cooldown == 0) {
-        _player.vy = -50
+        _player.vy = -40
         cooldown = 1
     }
 })
@@ -158,6 +190,7 @@ statusbars.onZero(StatusBarKind.Health, function (status) {
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.lifestealdrop, function (sprite, otherSprite) {
     sprites.destroy(otherSprite)
+    playerbar.value += -3
     timer.background(function () {
         isLifesteal = 1
         slashSpeed = 200
@@ -487,6 +520,14 @@ sprites.onCreated(SpriteKind.Projectile, function (sprite4) {
         })
     }
 })
+sprites.onOverlap(SpriteKind.Player, SpriteKind.sunaltar, function (sprite, otherSprite) {
+    isSunAvatar = 1
+    altarClaimed = 1
+    otherSprite.setImage(assets.image`stolenaltar`)
+    playerbar.max = 20
+    playerbar.value = 20
+    scene.setBackgroundImage(assets.image`SunBackground`)
+})
 sprites.onCreated(SpriteKind.flash, function (sprite) {
     timer.after(50, function () {
         sprites.destroy(sprite)
@@ -515,36 +556,26 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.bossShard, function (sprite, oth
     sprites.destroy(otherSprite, effects.clouds, 500)
     flashScreen()
 })
-/**
- * HOW TO PLAY:
- * 
- * - A and D to move back and forth
- * 
- * - Space to jump!
- * 
- * - E to switch weapon!
- * 
- * - Sword can half damage dealt to you(reflect lasers)
- * 
- * - Collect 4 or more shards to summon the boss!
- * 
- * - The boss has a one-shot attack, beware when it turns purple!
- * 
- * - Shoot the mini-eyes that spawn on the side to get points!
- */
 let currentEnemy: Sprite = null
 let enemyRNG = 0
 let currentPlatform: Sprite = null
 let platformRNG = 0
 let bullet: Sprite = null
+let bigsun: Sprite = null
+let sunbeam3: Sprite = null
+let sunbeam2: Sprite = null
+let sunbeam1: Sprite = null
 let enemylaser: Sprite = null
 let initenemies = 0
 let ammopowerup: Sprite = null
 let currentenemies = 0
 let medpack: Sprite = null
+let altar: Sprite = null
+let sunAvatarRng = 0
 let bossbullet: Sprite = null
 let flag: Sprite = null
 let generatedFinish = 0
+let altarClaimed = 0
 let flash: Sprite = null
 let flashcooldown = 0
 let slashSpeed = 0
@@ -553,6 +584,7 @@ let eyeboss: Sprite = null
 let shard: Sprite = null
 let shardDropChance = 0
 let bossStatusBar: StatusBarSprite = null
+let isSunAvatar = 0
 let bossAlive = 0
 let current_weapon = 0
 let endgamemessages: string[] = []
@@ -706,7 +738,6 @@ scene.setBackgroundImage(img`
     `)
 scene.setBackgroundColor(15)
 bossAlive = 1
-bossFight()
 game.onUpdate(function () {
     if (current_weapon == 1) {
         if (isLifesteal == 0) {
@@ -715,7 +746,11 @@ game.onUpdate(function () {
             _player.setImage(assets.image`player_swordlifesteal`)
         }
     } else if (current_weapon == 0) {
-        _player.setImage(assets.image`player_gun1`)
+        if (isSunAvatar == 0) {
+            _player.setImage(assets.image`player_gun1`)
+        } else if (isSunAvatar == 1) {
+            _player.setImage(assets.image`sunAvatar`)
+        }
     }
 })
 game.onUpdate(function () {
@@ -905,6 +940,16 @@ game.onUpdateInterval(5000, function () {
     }
 })
 game.onUpdateInterval(5000, function () {
+    if (altarClaimed == 0) {
+        sunAvatarRng = randint(0, 100)
+        if (sunAvatarRng <= 100) {
+            altar = sprites.create(assets.image`sunaltar`, SpriteKind.sunaltar)
+            altar.setPosition(155, randint(0, 110))
+            altar.setVelocity(-30, 0)
+        }
+    }
+})
+game.onUpdateInterval(5000, function () {
     if (bossAlive == 1 && playerbar.value < 10) {
         medpack = sprites.create(img`
             . 1 1 1 1 1 1 1 1 . 
@@ -922,39 +967,43 @@ game.onUpdateInterval(5000, function () {
     }
 })
 game.onUpdateInterval(5000, function () {
-    playerbar.value += 1
+    if (isLifesteal == 0) {
+        playerbar.value += 1
+    }
     flashcooldown = 0
     sprites.destroyAllSpritesOfKind(SpriteKind.Enemy)
     currentenemies = 0
 })
 game.onUpdateInterval(2000, function () {
     if (bossAlive == 1 && playerbar.value < 10) {
-        if (current_weapon == 0) {
-            ammopowerup = sprites.create(img`
-                . d d d d d d . 
-                . 7 7 7 7 7 7 . 
-                . 4 5 4 5 4 5 . 
-                . 4 5 4 5 4 5 . 
-                . 4 5 4 5 4 5 . 
-                . . . . . . . . 
-                `, SpriteKind.ammoBox)
-            ammopowerup.setFlag(SpriteFlag.AutoDestroy, true)
-            ammopowerup.setPosition(155, randint(0, 120))
-            ammopowerup.setVelocity(-50, 0)
-        } else if (current_weapon == 1) {
-            ammopowerup = sprites.create(img`
-                . . . 1 . . 
-                . . 1 4 b . 
-                . 1 4 2 b . 
-                . 1 4 2 b . 
-                1 4 2 2 2 b 
-                1 4 2 2 2 b 
-                . 1 2 2 2 b 
-                . . b b b . 
-                `, SpriteKind.lifestealdrop)
-            ammopowerup.setFlag(SpriteFlag.AutoDestroy, true)
-            ammopowerup.setPosition(155, randint(0, 120))
-            ammopowerup.setVelocity(-50, 0)
+        if (isSunAvatar == 0) {
+            if (current_weapon == 0) {
+                ammopowerup = sprites.create(img`
+                    . d d d d d d . 
+                    . 7 7 7 7 7 7 . 
+                    . 4 5 4 5 4 5 . 
+                    . 4 5 4 5 4 5 . 
+                    . 4 5 4 5 4 5 . 
+                    . . . . . . . . 
+                    `, SpriteKind.ammoBox)
+                ammopowerup.setFlag(SpriteFlag.AutoDestroy, true)
+                ammopowerup.setPosition(155, randint(0, 120))
+                ammopowerup.setVelocity(-50, 0)
+            } else if (current_weapon == 1) {
+                ammopowerup = sprites.create(img`
+                    . . . 1 . . 
+                    . . 1 4 b . 
+                    . 1 4 2 b . 
+                    . 1 4 2 b . 
+                    1 4 2 2 2 b 
+                    1 4 2 2 2 b 
+                    . 1 2 2 2 b 
+                    . . b b b . 
+                    `, SpriteKind.lifestealdrop)
+                ammopowerup.setFlag(SpriteFlag.AutoDestroy, true)
+                ammopowerup.setPosition(155, randint(0, 120))
+                ammopowerup.setVelocity(-50, 0)
+            }
         }
     }
 })
@@ -974,15 +1023,115 @@ game.onUpdateInterval(2000, function () {
         }
     }
 })
+game.onUpdateInterval(1000, function () {
+    if (isSunAvatar == 1) {
+        sunbeam1 = sprites.createProjectileFromSprite(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . 5 . 5 . 5 . 5 . . . . 
+            . 5 . . . 5 . 5 . 5 . 5 . . 5 . 
+            . . 5 . . . . . . . . . . 5 . . 
+            . . . . 5 5 5 5 5 5 5 5 . . . . 
+            . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
+            . . . . 5 5 4 4 4 4 5 5 . . . . 
+            . 5 5 . 5 5 4 4 4 4 5 5 . 5 5 . 
+            . . . . 5 5 4 4 5 5 5 5 . . . . 
+            . 5 5 . 5 5 4 4 5 5 5 5 . 5 5 . 
+            . . . . 5 5 5 5 5 5 5 5 . . . . 
+            . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
+            . . . . . . . . . . . . . . . . 
+            . . . 5 . 5 . 5 . 5 . 5 . 5 . . 
+            . . 5 . . 5 . 5 . 5 . 5 . . 5 . 
+            . . . . . . . . . . . . . . . . 
+            `, _player, 100, -45)
+        sunbeam1.setFlag(SpriteFlag.AutoDestroy, true)
+        sunbeam2 = sprites.createProjectileFromSprite(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . 5 . 5 . 5 . 5 . . . . 
+            . 5 . . . 5 . 5 . 5 . 5 . . 5 . 
+            . . 5 . . . . . . . . . . 5 . . 
+            . . . . 5 5 5 5 5 5 5 5 . . . . 
+            . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
+            . . . . 5 5 4 4 4 4 5 5 . . . . 
+            . 5 5 . 5 5 4 4 4 4 5 5 . 5 5 . 
+            . . . . 5 5 4 4 5 5 5 5 . . . . 
+            . 5 5 . 5 5 4 4 5 5 5 5 . 5 5 . 
+            . . . . 5 5 5 5 5 5 5 5 . . . . 
+            . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
+            . . . . . . . . . . . . . . . . 
+            . . . 5 . 5 . 5 . 5 . 5 . 5 . . 
+            . . 5 . . 5 . 5 . 5 . 5 . . 5 . 
+            . . . . . . . . . . . . . . . . 
+            `, _player, 100, 0)
+        sunbeam2.setFlag(SpriteFlag.AutoDestroy, true)
+        sunbeam3 = sprites.createProjectileFromSprite(img`
+            . . . . . . . . . . . . . . . . 
+            . . . . . 5 . 5 . 5 . 5 . . . . 
+            . 5 . . . 5 . 5 . 5 . 5 . . 5 . 
+            . . 5 . . . . . . . . . . 5 . . 
+            . . . . 5 5 5 5 5 5 5 5 . . . . 
+            . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
+            . . . . 5 5 4 4 4 4 5 5 . . . . 
+            . 5 5 . 5 5 4 4 4 4 5 5 . 5 5 . 
+            . . . . 5 5 4 4 5 5 5 5 . . . . 
+            . 5 5 . 5 5 4 4 5 5 5 5 . 5 5 . 
+            . . . . 5 5 5 5 5 5 5 5 . . . . 
+            . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
+            . . . . . . . . . . . . . . . . 
+            . . . 5 . 5 . 5 . 5 . 5 . 5 . . 
+            . . 5 . . 5 . 5 . 5 . 5 . . 5 . 
+            . . . . . . . . . . . . . . . . 
+            `, _player, 100, 45)
+        sunbeam3.setFlag(SpriteFlag.AutoDestroy, true)
+        bigsun = sprites.create(img`
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            .....5555555555555555555555.....
+            .....5555555555555555555555.....
+            .....5555555555555555555555.....
+            .....5555555555555555555555.....
+            .....5555555555555555555555.....
+            .....5555544444444445555555.....
+            .....5555544444444445555555.....
+            .....5555544444444445555555.....
+            .....5555544444444445555555.....
+            .....5555544444444445555555.....
+            .....5555544444555555555555.....
+            .....5555544444555555555555.....
+            .....5555544444555555555555.....
+            .....5555544444555555555555.....
+            .....5555544444555555555555.....
+            .....5555555555555555555555.....
+            .....5555555555555555555555.....
+            .....5555555555555555555555.....
+            .....5555555555555555555555.....
+            .....5555555555555555555555.....
+            .....5555555555555555555555.....
+            .....5555555555555555555555.....
+            ................................
+            ................................
+            ................................
+            ................................
+            ................................
+            `, SpriteKind.Projectile)
+        bigsun.setFlag(SpriteFlag.AutoDestroy, true)
+        bigsun.setPosition(10, _player.y)
+        bigsun.setVelocity(150, 0)
+    }
+})
 game.onUpdateInterval(1500, function () {
     if (current_weapon == 0) {
-        for (let index = 0; index < starscatterProjectileNumber; index++) {
-            bullet = sprites.createProjectileFromSprite(img`
-                . 1 . 
-                1 1 1 
-                . 1 . 
-                `, _player, randint(80, 100), randint(-15, 15))
-            bullet.setFlag(SpriteFlag.AutoDestroy, true)
+        if (isSunAvatar == 0) {
+            for (let index = 0; index < starscatterProjectileNumber; index++) {
+                bullet = sprites.createProjectileFromSprite(img`
+                    . 1 . 
+                    1 1 1 
+                    . 1 . 
+                    `, _player, randint(80, 100), randint(-15, 15))
+                bullet.setFlag(SpriteFlag.AutoDestroy, true)
+            }
         }
     }
 })
