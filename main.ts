@@ -72,13 +72,8 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite5, ot
                 `, SpriteKind.bossShard)
             shard.setPosition(otherSprite4.x, otherSprite4.y)
             shard.setVelocity(-25, 0)
-            shard.setBounceOnWall(true)
             shard.setFlag(SpriteFlag.AutoDestroy, true)
         }
-        sprites.destroy(sprite5, effects.fire, 500)
-        sprites.destroy(otherSprite4, effects.fire, 500)
-        info.changeScoreBy(1)
-        shardDropChance = randint(0, 3)
     }
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.killbrick, function (sprite, otherSprite) {
@@ -108,6 +103,7 @@ sprites.onOverlap(SpriteKind.enemyProjectile, SpriteKind.Player, function (sprit
 sprites.onOverlap(SpriteKind.Player, SpriteKind.finish, function (sprite, otherSprite) {
     flashScreen()
     timer.after(1000, function () {
+        game.setGameOverEffect(true, effects.melt)
         game.setGameOverMessage(true, "Eye down, eye defeated it!")
         game.gameOver(true)
     })
@@ -120,14 +116,21 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     }
 })
 function bossFight () {
+    sprites.destroyAllSpritesOfKind(SpriteKind.bossShard, effects.spray, 500)
     bossStatusBar = statusbars.create(100, 5, StatusBarKind.EnemyHealth)
+    _player.setPosition(10, 60)
     bossStatusBar.setLabel("EYELORD")
     bossStatusBar.setBarBorder(1, 4)
     bossStatusBar.setColor(2, 1)
     bossStatusBar.setStatusBarFlag(StatusBarFlag.SmoothTransition, true)
-    bossStatusBar.max = 150
     bossStatusBar.positionDirection(CollisionDirection.Top)
-    bossStatusBar.value = 150
+    if (isSunAvatar == 0) {
+        bossStatusBar.max = 150
+        bossStatusBar.value = 150
+    } else if (isSunAvatar == 1) {
+        bossStatusBar.max = 300
+        bossStatusBar.value = 300
+    }
     eyeboss = sprites.create(img`
         ...fffffffffffff
         ...fffffffffffff
@@ -563,6 +566,8 @@ let enemyRNG = 0
 let currentPlatform: Sprite = null
 let platformRNG = 0
 let bullet: Sprite = null
+let altar: Sprite = null
+let sunAvatarRng = 0
 let sunstorm: Sprite = null
 let sunbeam3: Sprite = null
 let sunbeam2: Sprite = null
@@ -572,8 +577,6 @@ let initenemies = 0
 let ammopowerup: Sprite = null
 let currentenemies = 0
 let medpack: Sprite = null
-let altar: Sprite = null
-let sunAvatarRng = 0
 let ton2: Sprite = null
 let ton1: Sprite = null
 let bossbullet: Sprite = null
@@ -742,7 +745,7 @@ scene.setBackgroundImage(img`
     `)
 scene.setBackgroundColor(15)
 bossAlive = 1
-bossFight()
+isSunAvatar = 1
 game.onUpdate(function () {
     if (current_weapon == 1) {
         if (isLifesteal == 0) {
@@ -973,16 +976,6 @@ game.onUpdateInterval(5000, function () {
     }
 })
 game.onUpdateInterval(5000, function () {
-    if (altarClaimed == 0) {
-        sunAvatarRng = randint(0, 100)
-        if (sunAvatarRng == 1) {
-            altar = sprites.create(assets.image`sunaltar`, SpriteKind.sunaltar)
-            altar.setPosition(155, randint(0, 110))
-            altar.setVelocity(-30, 0)
-        }
-    }
-})
-game.onUpdateInterval(5000, function () {
     if (bossAlive == 1 && playerbar.value < 10) {
         medpack = sprites.create(img`
             . 1 1 1 1 1 1 1 1 . 
@@ -1079,22 +1072,10 @@ game.onUpdateInterval(2000, function () {
                 `, _player, 100, -45)
             sunbeam1.setFlag(SpriteFlag.AutoDestroy, true)
             sunbeam2 = sprites.createProjectileFromSprite(img`
-                . . . . . . . . . . . . . . . . 
-                . . . . . 5 . 5 . 5 . 5 . . . . 
-                . 5 . . . 5 . 5 . 5 . 5 . . 5 . 
-                . . 5 . . . . . . . . . . 5 . . 
-                . . . . 5 5 5 5 5 5 5 5 . . . . 
-                . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
-                . . . . 5 5 4 4 4 4 5 5 . . . . 
-                . 5 5 . 5 5 4 4 4 4 5 5 . 5 5 . 
-                . . . . 5 5 4 4 5 5 5 5 . . . . 
-                . 5 5 . 5 5 4 4 5 5 5 5 . 5 5 . 
-                . . . . 5 5 5 5 5 5 5 5 . . . . 
-                . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
-                . . . . . . . . . . . . . . . . 
-                . . . 5 . 5 . 5 . 5 . 5 . 5 . . 
-                . . 5 . . 5 . 5 . 5 . 5 . . 5 . 
-                . . . . . . . . . . . . . . . . 
+                5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 
+                4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
+                4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
+                5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 
                 `, _player, 100, 0)
             sunbeam2.setFlag(SpriteFlag.AutoDestroy, true)
             sunbeam3 = sprites.createProjectileFromSprite(img`
@@ -1185,6 +1166,16 @@ game.onUpdateInterval(2000, function () {
             sunstorm.setFlag(SpriteFlag.AutoDestroy, true)
             sunstorm.setPosition(10, _player.y)
             sunstorm.setVelocity(100, 0)
+        }
+    }
+})
+game.onUpdateInterval(1000, function () {
+    if (altarClaimed == 0) {
+        sunAvatarRng = randint(0, 100)
+        if (sunAvatarRng == 1) {
+            altar = sprites.create(assets.image`sunaltar`, SpriteKind.sunaltar)
+            altar.setPosition(155, randint(0, 110))
+            altar.setVelocity(-30, 0)
         }
     }
 })
