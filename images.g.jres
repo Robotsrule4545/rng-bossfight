@@ -59,6 +59,11 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "sunAvatar"
     },
+    "image11": {
+        "data": "hwQRABQAAAAAAAAAVQUAAAAAAAAAVUAEAAAAAAABAAABAAAAAEQEVQAAAAAAAAAAAAAAAAAAAAAAREQiIiJEREQAAAAARERmIiJEREQAAAAAFEFmIiJVVVUAAAAABJBmAAAAAAAAAAAAAJBmUFUAAFUFAAAAAJBmAAAAAAAAAABQVZBmAABVBQBVAAAAAAIAAAAAAAAAAAAAQEUCAAAAAAAAAAAAUkUAEEBEBAAAAAAAAAQAAAAAAAAAAAAQAAAAAAAAEAEAAAAAVVUAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "sunAvatar2"
+    },
     "*": {
         "mimeType": "image/x-mkcd-f4",
         "dataEncoding": "base64",
