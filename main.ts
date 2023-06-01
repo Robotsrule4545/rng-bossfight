@@ -617,6 +617,7 @@ playerbar = statusbars.create(10, 2, StatusBarKind.Health)
 _player = sprites.create(assets.image`player_gun1`, SpriteKind.Player)
 playerbar.attachToSprite(_player)
 playerbar.max = 10
+playerbar.setStatusBarFlag(StatusBarFlag.SmoothTransition, true)
 endgamemessages = [
 "Press E to switch weapons!",
 "Press SPACE to jump!",
@@ -753,7 +754,6 @@ scene.setBackgroundImage(img`
     `)
 scene.setBackgroundColor(15)
 bossAlive = 1
-isSunAvatar = 1
 game.onUpdate(function () {
     if (current_weapon == 1) {
         if (isLifesteal == 0) {
@@ -1208,18 +1208,16 @@ game.onUpdateInterval(1500, function () {
                     1 1 1 
                     . 1 . 
                     `, _player, randint(50, 100), randint(-30, 30))
-                casing = sprites.create(img`
-                    2 2 2 2 2 1 1 
-                    2 2 2 2 2 1 1 
-                    2 2 2 2 2 1 1 
-                    2 2 2 2 2 1 1 
-                    `, SpriteKind.casing)
-                casing.setPosition(_player.x, _player.y)
-                casing.setVelocity(0, 60)
                 music.ringTone(330)
                 bullet.setFlag(SpriteFlag.AutoDestroy, true)
-                casing.setFlag(SpriteFlag.AutoDestroy, true)
             }
+            casing = sprites.create(img`
+                2 2 1 
+                2 2 1 
+                `, SpriteKind.casing)
+            casing.setPosition(_player.x, _player.y)
+            casing.setVelocity(0, 30)
+            casing.setFlag(SpriteFlag.AutoDestroy, true)
         }
     }
 })
