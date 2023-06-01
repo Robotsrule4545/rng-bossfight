@@ -557,7 +557,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.ammoBox, function (sprite, other
     music.play(music.melodyPlayable(music.jumpUp), music.PlaybackMode.InBackground)
     sprites.destroy(otherSprite)
     timer.background(function () {
-        starscatterProjectileNumber = 12
+        starscatterProjectileNumber = 32
         pause(5000)
         starscatterProjectileNumber = 6
     })
@@ -751,6 +751,7 @@ scene.setBackgroundImage(img`
     `)
 scene.setBackgroundColor(15)
 bossAlive = 1
+isSunAvatar = 1
 game.onUpdate(function () {
     if (current_weapon == 1) {
         if (isLifesteal == 0) {
@@ -1059,49 +1060,60 @@ game.onUpdateInterval(2000, function () {
     if (isSunAvatar == 1) {
         if (current_weapon == 0) {
             sunbeam1 = sprites.createProjectileFromSprite(img`
+                . . . . 1 . . . . . . . 5 5 5 5 
+                . . . 1 . . . . . . . 5 4 4 4 5 
+                . . . . . . . . . 2 . . 5 5 4 5 
+                . . . . . . . . 2 . . . 4 5 4 5 
+                . . . . . . . . . . . 4 . . 5 . 
+                . . . . . . . . . . 4 . . . . . 
+                . . . . . . . . . 4 . . . . . . 
+                . . 2 . . . . . 4 . . . . . . . 
+                . 2 . . . . . 4 . . . . . . . . 
+                . . . . . . 4 . . . . . . . . . 
+                . . . 5 5 4 . . . . . . . 2 . . 
+                . . 5 5 4 5 . . . . . . 2 . . . 
+                . 5 5 4 5 5 . . . . . . . . 1 . 
+                . . . 5 5 . . . 1 . . . . 1 . . 
+                . . . 5 . . . 1 . . . . . . . . 
                 . . . . . . . . . . . . . . . . 
-                . . . . . 5 . 5 . 5 . 5 . . . . 
-                . 5 . . . 5 . 5 . 5 . 5 . . 5 . 
-                . . 5 . . . . . . . . . . 5 . . 
-                . . . . 5 5 5 5 5 5 5 5 . . . . 
-                . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
-                . . . . 5 5 4 4 4 4 5 5 . . . . 
-                . 5 5 . 5 5 4 4 4 4 5 5 . 5 5 . 
-                . . . . 5 5 4 4 5 5 5 5 . . . . 
-                . 5 5 . 5 5 4 4 5 5 5 5 . 5 5 . 
-                . . . . 5 5 5 5 5 5 5 5 . . . . 
-                . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
-                . . . . . . . . . . . . . . . . 
-                . . . 5 . 5 . 5 . 5 . 5 . 5 . . 
-                . . 5 . . 5 . 5 . 5 . 5 . . 5 . 
-                . . . . . . . . . . . . . . . . 
-                `, _player, 100, -45)
+                `, _player, 80, -45)
             sunbeam1.setFlag(SpriteFlag.AutoDestroy, true)
             sunbeam2 = sprites.createProjectileFromSprite(img`
-                5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 
-                4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
-                4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 
-                5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 5 
-                `, _player, 100, 0)
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . 1 1 . 
+                . . . . 1 2 2 . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . . . . 
+                5 5 . . . . . . . . . 5 5 . . . 
+                . 5 5 5 . . . . . . 5 4 4 5 5 . 
+                . 2 4 4 4 4 4 4 4 4 4 5 4 4 4 5 
+                . 5 5 5 . . . . . . 5 4 4 5 5 . 
+                5 5 . . . . 1 1 . . . 5 5 . . . 
+                . . . . . . . . . . . . . . . . 
+                . 1 2 2 . . . . . . . . . . . . 
+                . . . . . . . . . 1 2 2 . . . . 
+                . . . . . . . . . . . . . . . . 
+                . . . . . . . . . . . . . 1 1 . 
+                `, _player, 120, 0)
             sunbeam2.setFlag(SpriteFlag.AutoDestroy, true)
             sunbeam3 = sprites.createProjectileFromSprite(img`
                 . . . . . . . . . . . . . . . . 
-                . . . . . 5 . 5 . 5 . 5 . . . . 
-                . 5 . . . 5 . 5 . 5 . 5 . . 5 . 
-                . . 5 . . . . . . . . . . 5 . . 
-                . . . . 5 5 5 5 5 5 5 5 . . . . 
-                . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
-                . . . . 5 5 4 4 4 4 5 5 . . . . 
-                . 5 5 . 5 5 4 4 4 4 5 5 . 5 5 . 
-                . . . . 5 5 4 4 5 5 5 5 . . . . 
-                . 5 5 . 5 5 4 4 5 5 5 5 . 5 5 . 
-                . . . . 5 5 5 5 5 5 5 5 . . . . 
-                . 5 5 . 5 5 5 5 5 5 5 5 . 5 5 . 
-                . . . . . . . . . . . . . . . . 
-                . . . 5 . 5 . 5 . 5 . 5 . 5 . . 
-                . . 5 . . 5 . 5 . 5 . 5 . . 5 . 
-                . . . . . . . . . . . . . . . . 
-                `, _player, 100, 45)
+                . . . 5 . . . 1 . . . . . . . . 
+                . . . 5 5 . . . 1 . . . . 1 . . 
+                . 5 5 4 5 5 . . . . . . . . 1 . 
+                . . 5 5 4 5 . . . . . . 2 . . . 
+                . . . 5 5 4 . . . . . . . 2 . . 
+                . . . . . . 4 . . . . . . . . . 
+                . 2 . . . . . 4 . . . . . . . . 
+                . . 2 . . . . . 4 . . . . . . . 
+                . . . . . . . . . 4 . . . . . . 
+                . . . . . . . . . . 4 . . . . . 
+                . . . . . . . . . . . 4 . . 5 . 
+                . . . . . . . . 2 . . . 4 5 4 5 
+                . . . . . . . . . 2 . . 5 5 4 5 
+                . . . 1 . . . . . . . 5 4 4 4 5 
+                . . . . 1 . . . . . . . 5 5 5 5 
+                `, _player, 80, 45)
             sunbeam3.setFlag(SpriteFlag.AutoDestroy, true)
             sunstorm = sprites.create(img`
                 ................
@@ -1171,7 +1183,7 @@ game.onUpdateInterval(2000, function () {
                 `, SpriteKind.Projectile)
             sunstorm.setFlag(SpriteFlag.AutoDestroy, true)
             sunstorm.setPosition(10, _player.y)
-            sunstorm.setVelocity(100, 0)
+            sunstorm.setVelocity(60, 0)
         }
     }
 })
