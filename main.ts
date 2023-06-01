@@ -13,6 +13,7 @@ namespace SpriteKind {
     export const ammoBox = SpriteKind.create()
     export const lifestealdrop = SpriteKind.create()
     export const sunaltar = SpriteKind.create()
+    export const casing = SpriteKind.create()
 }
 /**
  * HOW TO PLAY:
@@ -557,7 +558,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.ammoBox, function (sprite, other
     music.play(music.melodyPlayable(music.jumpUp), music.PlaybackMode.InBackground)
     sprites.destroy(otherSprite)
     timer.background(function () {
-        starscatterProjectileNumber = 32
+        starscatterProjectileNumber = 18
         pause(5000)
         starscatterProjectileNumber = 6
     })
@@ -571,6 +572,7 @@ let currentEnemy: Sprite = null
 let enemyRNG = 0
 let currentPlatform: Sprite = null
 let platformRNG = 0
+let casing: Sprite = null
 let bullet: Sprite = null
 let altar: Sprite = null
 let sunAvatarRng = 0
@@ -1204,9 +1206,18 @@ game.onUpdateInterval(1500, function () {
                     . 1 . 
                     1 1 1 
                     . 1 . 
-                    `, _player, randint(80, 100), randint(-15, 15))
+                    `, _player, randint(50, 100), randint(-30, 30))
+                casing = sprites.create(img`
+                    2 2 2 2 2 1 1 
+                    2 2 2 2 2 1 1 
+                    2 2 2 2 2 1 1 
+                    2 2 2 2 2 1 1 
+                    `, SpriteKind.casing)
+                casing.setPosition(_player.x, _player.y)
+                casing.setVelocity(0, 60)
                 music.ringTone(330)
                 bullet.setFlag(SpriteFlag.AutoDestroy, true)
+                casing.setFlag(SpriteFlag.AutoDestroy, true)
             }
         }
     }
