@@ -751,7 +751,6 @@ scene.setBackgroundImage(img`
     `)
 scene.setBackgroundColor(15)
 bossAlive = 1
-isSunAvatar = 1
 game.onUpdate(function () {
     if (current_weapon == 1) {
         if (isLifesteal == 0) {
