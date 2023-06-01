@@ -192,6 +192,7 @@ statusbars.onZero(StatusBarKind.Health, function (status) {
     game.gameOver(false)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.lifestealdrop, function (sprite, otherSprite) {
+    music.play(music.melodyPlayable(music.jumpUp), music.PlaybackMode.InBackground)
     if (isLifesteal == 0) {
         playerbar.max = 15
         playerbar.value += -3
@@ -207,6 +208,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.lifestealdrop, function (sprite,
 function flashScreen () {
     if (flashcooldown == 0) {
         for (let index = 0; index < 2; index++) {
+            music.play(music.tonePlayable(330, music.beat(BeatFraction.Whole)), music.PlaybackMode.UntilDone)
             flash = sprites.create(img`
                 111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
                 111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
@@ -512,6 +514,7 @@ function flashScreen () {
             pause(50)
             sprites.destroy(flash)
             pause(100)
+            music.stopAllSounds()
         }
         sprites.destroy(flash)
         flashcooldown = 1
@@ -529,6 +532,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.sunaltar, function (sprite, othe
     isSunAvatar = 1
     altarClaimed = 1
     otherSprite.setImage(assets.image`stolenaltar`)
+    music.play(music.melodyPlayable(music.powerUp), music.PlaybackMode.InBackground)
     playerbar.max = 20
     playerbar.value = 20
     scene.setBackgroundImage(assets.image`SunBackground`)
@@ -539,6 +543,7 @@ sprites.onCreated(SpriteKind.flash, function (sprite) {
     })
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.medpack, function (sprite, otherSprite) {
+    music.play(music.melodyPlayable(music.jumpUp), music.PlaybackMode.InBackground)
     sprites.destroy(otherSprite)
     playerbar.value += 1
     timer.background(function () {
@@ -549,6 +554,7 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.medpack, function (sprite, other
     })
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.ammoBox, function (sprite, otherSprite) {
+    music.play(music.melodyPlayable(music.jumpUp), music.PlaybackMode.InBackground)
     sprites.destroy(otherSprite)
     timer.background(function () {
         starscatterProjectileNumber = 12
@@ -745,7 +751,6 @@ scene.setBackgroundImage(img`
     `)
 scene.setBackgroundColor(15)
 bossAlive = 1
-isSunAvatar = 1
 game.onUpdate(function () {
     if (current_weapon == 1) {
         if (isLifesteal == 0) {
@@ -1042,6 +1047,7 @@ game.onUpdateInterval(2000, function () {
                     1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 
                     3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 
                     `, SpriteKind.enemyProjectile)
+                music.play(music.melodyPlayable(music.pewPew), music.PlaybackMode.InBackground)
                 enemylaser.setPosition(value.x, value.y)
                 enemylaser.setVelocity(randint(-100, -150), 0)
                 enemylaser.setFlag(SpriteFlag.AutoDestroy, true)
@@ -1188,6 +1194,7 @@ game.onUpdateInterval(1500, function () {
                     1 1 1 
                     . 1 . 
                     `, _player, randint(80, 100), randint(-15, 15))
+                music.ringTone(330)
                 bullet.setFlag(SpriteFlag.AutoDestroy, true)
             }
         }
