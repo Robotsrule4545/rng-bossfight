@@ -64,6 +64,11 @@
         "mimeType": "image/x-mkcd-f4",
         "displayName": "sunAvatar2"
     },
+    "image12": {
+        "data": "hwQRABQAAAAAAAAAAAAAAAAAAAAAAADAzAAAAAAAAADADN27u7sNzAwAAAAAAAC7u7sAAAAAAAAA3d3MzMzd3d0AAAAA3d3MzMzd3d0AAAAAzdzMzMwREREAAAAADQC7AAAAAAAAAAAAAAC7EAEAABEBAAAAAAC7AAAAAAAAAACwuwC7AAAAAAAAAAAMAAARwBARAAAAAAAAwAwAAAAAAAAAAAAAHM0AALC7CwAAAAAA3M3AAAAAAAAAAAAAwAwAAAAAAAAAAACwuwsAAAAAAAAAAAA=",
+        "mimeType": "image/x-mkcd-f4",
+        "displayName": "moonAvatar"
+    },
     "*": {
         "mimeType": "image/x-mkcd-f4",
         "dataEncoding": "base64",

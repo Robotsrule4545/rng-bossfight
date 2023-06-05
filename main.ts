@@ -15,29 +15,6 @@ namespace SpriteKind {
     export const sunaltar = SpriteKind.create()
     export const casing = SpriteKind.create()
 }
-/**
- * HOW TO PLAY:
- * 
- * - A and D to move back and forth
- * 
- * - Space to jump!
- * 
- * - E to switch weapon!
- * 
- * - Sword can half damage dealt to you(reflect lasers)
- * 
- * - Collect 4 or more shards to summon the boss!
- * 
- * - The boss has a one-shot attack, beware when it turns purple!
- * 
- * - Shoot the mini-eyes that spawn on the side to get points!
- * 
- * - Ammo boxes increase the amount of projectiles you fire.
- * 
- * - The blood drop turns you into a super damager, but you can't heal and it requires a health sacrifice. (-3 hp)
- * 
- * - Touch the elusive sun altar to channel the might of the sun!
- */
 sprites.onOverlap(SpriteKind.boss, SpriteKind.Projectile, function (sprite, otherSprite) {
     if (current_weapon == 0) {
         if (isSunAvatar == 0) {
@@ -167,7 +144,14 @@ function bossFight () {
         ...fffffffffffff
         ...fffffffffffff
         `, SpriteKind.boss)
+    animation.runMovementAnimation(
+    eyeboss,
+    animation.animationPresets(animation.easeDown),
+    2000,
+    false
+    )
     eyeboss.changeScale(2, ScaleAnchor.Right)
+    animation.stopAnimation(animation.AnimationTypes.All, eyeboss)
     eyeboss.setPosition(150, 70)
     bossonscreen = 1
 }
@@ -568,6 +552,29 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.bossShard, function (sprite, oth
     sprites.destroy(otherSprite, effects.clouds, 500)
     flashScreen()
 })
+/**
+ * HOW TO PLAY:
+ * 
+ * - A and D to move back and forth
+ * 
+ * - Space to jump!
+ * 
+ * - E to switch weapon!
+ * 
+ * - Sword can half damage dealt to you(reflect lasers)
+ * 
+ * - Collect 4 or more shards to summon the boss!
+ * 
+ * - The boss has a one-shot attack, beware when it turns purple!
+ * 
+ * - Shoot the mini-eyes that spawn on the side to get points!
+ * 
+ * - Ammo boxes increase the amount of projectiles you fire.
+ * 
+ * - The blood drop turns you into a super damager, but you can't heal and it requires a health sacrifice. (-3 hp)
+ * 
+ * - Touch the elusive sun altar to channel the might of the sun!
+ */
 let currentEnemy: Sprite = null
 let enemyRNG = 0
 let currentPlatform: Sprite = null
@@ -576,6 +583,7 @@ let casing: Sprite = null
 let bullet: Sprite = null
 let altar: Sprite = null
 let sunAvatarRng = 0
+let moonAvatarRng = 0
 let sunstorm: Sprite = null
 let sunbeam3: Sprite = null
 let sunbeam2: Sprite = null
@@ -590,6 +598,7 @@ let ton1: Sprite = null
 let bossbullet: Sprite = null
 let flag: Sprite = null
 let generatedFinish = 0
+let isMoonAvatar = 0
 let altarClaimed = 0
 let flash: Sprite = null
 let flashcooldown = 0
@@ -598,6 +607,7 @@ let cooldown = 0
 let eyeboss: Sprite = null
 let shard: Sprite = null
 let shardDropChance = 0
+let isLifesteal = 0
 let bossStatusBar: StatusBarSprite = null
 let isSunAvatar = 0
 let bossAlive = 0
@@ -607,8 +617,6 @@ let _player: Sprite = null
 let playerbar: StatusBarSprite = null
 let bossonscreen = 0
 let starscatterProjectileNumber = 0
-let isLifesteal = 0
-isLifesteal = 0
 starscatterProjectileNumber = 6
 bossonscreen = 0
 let bossShards = 0
@@ -760,6 +768,8 @@ game.onUpdate(function () {
             _player.setImage(assets.image`player_sword`)
         } else if (isLifesteal == 1) {
             _player.setImage(assets.image`player_swordlifesteal`)
+        } else if (isMoonAvatar == 1) {
+            _player.setImage(assets.image`moonAvatar`)
         }
     } else if (current_weapon == 0) {
         if (isSunAvatar == 0) {
@@ -770,7 +780,7 @@ game.onUpdate(function () {
     }
 })
 game.onUpdate(function () {
-    if (bossShards >= 4 && info.score() >= 10) {
+    if (bossShards >= 10 && info.score() >= 10) {
         bossShards = 0
         bossFight()
     }
@@ -1015,7 +1025,7 @@ game.onUpdateInterval(5000, function () {
 })
 game.onUpdateInterval(2000, function () {
     if (bossAlive == 1) {
-        if (isSunAvatar == 0) {
+        if (isSunAvatar == 0 || isMoonAvatar == 0) {
             if (current_weapon == 0) {
                 ammopowerup = sprites.create(img`
                     . d d d d d d . 
@@ -1195,6 +1205,11 @@ game.onUpdateInterval(2000, function () {
     }
 })
 game.onUpdateInterval(1000, function () {
+    moonAvatarRng = randint(1, 1000)
+    if (moonAvatarRng == 1) {
+        isMoonAvatar = 1
+        playerbar.max = 60
+    }
     if (altarClaimed == 0) {
         sunAvatarRng = randint(0, 100)
         if (sunAvatarRng == 1) {
@@ -1285,8 +1300,51 @@ game.onUpdateInterval(450, function () {
                     `, _player, 46, 0)
                 bullet.setFlag(SpriteFlag.AutoDestroy, true)
             })
-            timer.after(150, function () {
-                sprites.destroy(bullet)
+        } else if (isMoonAvatar == 1) {
+            bullet = sprites.createProjectileFromSprite(img`
+                d c . . . . . . . 
+                d b c . . . . . . 
+                . d b c c . . . . 
+                . . d d b c . . . 
+                . . . d b b c . . 
+                . . . . d b c . . 
+                . . . . d b c . . 
+                . . . . d b c . . 
+                . . . . . d b c . 
+                . . . . . d b c . 
+                . . . . . d b c . 
+                . . . . d b c . . 
+                . . . d b b c . . 
+                . . d d b c . . . 
+                . d b b c . . . . 
+                d b c . . . . . . 
+                `, _player, 6, 0)
+            bullet.setFlag(SpriteFlag.AutoDestroy, true)
+            timer.background(function () {
+                pause(100)
+                bullet = sprites.createProjectileFromSprite(img`
+                    . . . . . . . c . 
+                    . . . . . . d b c 
+                    . . . . . . d b c 
+                    . . . . . . d b c 
+                    . . . . . . d b c 
+                    . . . . . . d b c 
+                    . . . . . . d b c 
+                    . . . . . . d b c 
+                    . . . . . . d b c 
+                    . . . . . . d b c 
+                    . . . . . . d b c 
+                    . . . . . . d b c 
+                    . . . . . . d b c 
+                    . . . . . . d b c 
+                    . . . . . . d b c 
+                    . . . . . d b c . 
+                    . . . d d b c c . 
+                    . d d b b c . . . 
+                    c b b c c . . . . 
+                    . c c . . . . . . 
+                    `, _player, 60, 0)
+                bullet.setFlag(SpriteFlag.AutoDestroy, true)
             })
         }
     }
