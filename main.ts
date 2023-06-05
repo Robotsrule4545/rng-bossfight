@@ -27,6 +27,8 @@ sprites.onOverlap(SpriteKind.boss, SpriteKind.Projectile, function (sprite, othe
             bossStatusBar.value += -3
         } else if (isLifesteal == 1) {
             bossStatusBar.value += -15
+        } else if (isMoonAvatar == 1) {
+            bossStatusBar.value += -1
         }
     }
     sprites.destroy(otherSprite)
@@ -598,7 +600,6 @@ let ton1: Sprite = null
 let bossbullet: Sprite = null
 let flag: Sprite = null
 let generatedFinish = 0
-let isMoonAvatar = 0
 let altarClaimed = 0
 let flash: Sprite = null
 let flashcooldown = 0
@@ -607,6 +608,7 @@ let cooldown = 0
 let eyeboss: Sprite = null
 let shard: Sprite = null
 let shardDropChance = 0
+let isMoonAvatar = 0
 let isLifesteal = 0
 let bossStatusBar: StatusBarSprite = null
 let isSunAvatar = 0
@@ -766,10 +768,11 @@ game.onUpdate(function () {
     if (current_weapon == 1) {
         if (isLifesteal == 0) {
             _player.setImage(assets.image`player_sword`)
+            if (isMoonAvatar == 1) {
+                _player.setImage(assets.image`moonAvatar`)
+            }
         } else if (isLifesteal == 1) {
             _player.setImage(assets.image`player_swordlifesteal`)
-        } else if (isMoonAvatar == 1) {
-            _player.setImage(assets.image`moonAvatar`)
         }
     } else if (current_weapon == 0) {
         if (isSunAvatar == 0) {
@@ -1205,10 +1208,12 @@ game.onUpdateInterval(2000, function () {
     }
 })
 game.onUpdateInterval(1000, function () {
-    moonAvatarRng = randint(1, 1000)
-    if (moonAvatarRng == 1) {
-        isMoonAvatar = 1
-        playerbar.max = 60
+    if (moonAvatarRng == 0) {
+        moonAvatarRng = randint(1, 1)
+        if (moonAvatarRng == 1) {
+            isMoonAvatar = 1
+            playerbar.max = 60
+        }
     }
     if (altarClaimed == 0) {
         sunAvatarRng = randint(0, 100)
@@ -1263,89 +1268,92 @@ game.onUpdateInterval(450, function () {
                 sprites.destroy(bullet)
             })
         } else if (isLifesteal == 0) {
-            bullet = sprites.createProjectileFromSprite(img`
-                1 8 . . . . . . . 
-                1 9 8 . . . . . . 
-                . 1 9 8 8 . . . . 
-                . . 1 1 9 8 . . . 
-                . . . 1 9 9 8 . . 
-                . . . . 1 9 8 . . 
-                . . . . 1 9 8 . . 
-                . . . . 1 9 8 . . 
-                . . . . . 1 9 8 . 
-                . . . . . 1 9 8 . 
-                . . . . . 1 9 8 . 
-                . . . . 1 9 8 . . 
-                . . . 1 9 9 8 . . 
-                . . 1 1 9 8 . . . 
-                . 1 9 9 8 . . . . 
-                1 9 8 . . . . . . 
-                `, _player, 46, 0)
-            bullet.setFlag(SpriteFlag.AutoDestroy, true)
-            timer.background(function () {
-                pause(200)
+            if (isMoonAvatar == 0) {
                 bullet = sprites.createProjectileFromSprite(img`
-                    . . . . . . . 1 . 
-                    . . . . . . 1 9 8 
-                    . . . . . . 1 9 8 
-                    . . . . . . 1 9 8 
-                    . . . . . . 1 9 8 
-                    . . . . . . 1 9 8 
-                    . . . . . . 1 9 8 
+                    1 8 . . . . . . . 
+                    1 9 8 . . . . . . 
+                    . 1 9 8 8 . . . . 
+                    . . 1 1 9 8 . . . 
+                    . . . 1 9 9 8 . . 
+                    . . . . 1 9 8 . . 
+                    . . . . 1 9 8 . . 
+                    . . . . 1 9 8 . . 
                     . . . . . 1 9 8 . 
-                    . . . 1 1 9 8 8 . 
-                    . 1 1 9 9 8 . . . 
-                    1 9 9 8 8 . . . . 
-                    . 8 8 . . . . . . 
+                    . . . . . 1 9 8 . 
+                    . . . . . 1 9 8 . 
+                    . . . . 1 9 8 . . 
+                    . . . 1 9 9 8 . . 
+                    . . 1 1 9 8 . . . 
+                    . 1 9 9 8 . . . . 
+                    1 9 8 . . . . . . 
                     `, _player, 46, 0)
                 bullet.setFlag(SpriteFlag.AutoDestroy, true)
-            })
-        } else if (isMoonAvatar == 1) {
-            bullet = sprites.createProjectileFromSprite(img`
-                d c . . . . . . . 
-                d b c . . . . . . 
-                . d b c c . . . . 
-                . . d d b c . . . 
-                . . . d b b c . . 
-                . . . . d b c . . 
-                . . . . d b c . . 
-                . . . . d b c . . 
-                . . . . . d b c . 
-                . . . . . d b c . 
-                . . . . . d b c . 
-                . . . . d b c . . 
-                . . . d b b c . . 
-                . . d d b c . . . 
-                . d b b c . . . . 
-                d b c . . . . . . 
-                `, _player, 6, 0)
-            bullet.setFlag(SpriteFlag.AutoDestroy, true)
-            timer.background(function () {
-                pause(100)
+                timer.background(function () {
+                    pause(200)
+                    bullet = sprites.createProjectileFromSprite(img`
+                        . . . . . . . 1 . 
+                        . . . . . . 1 9 8 
+                        . . . . . . 1 9 8 
+                        . . . . . . 1 9 8 
+                        . . . . . . 1 9 8 
+                        . . . . . . 1 9 8 
+                        . . . . . . 1 9 8 
+                        . . . . . 1 9 8 . 
+                        . . . 1 1 9 8 8 . 
+                        . 1 1 9 9 8 . . . 
+                        1 9 9 8 8 . . . . 
+                        . 8 8 . . . . . . 
+                        `, _player, 46, 0)
+                    bullet.setFlag(SpriteFlag.AutoDestroy, true)
+                })
+            }
+            if (isMoonAvatar == 1) {
                 bullet = sprites.createProjectileFromSprite(img`
-                    . . . . . . . c . 
-                    . . . . . . d b c 
-                    . . . . . . d b c 
-                    . . . . . . d b c 
-                    . . . . . . d b c 
-                    . . . . . . d b c 
-                    . . . . . . d b c 
-                    . . . . . . d b c 
-                    . . . . . . d b c 
-                    . . . . . . d b c 
-                    . . . . . . d b c 
-                    . . . . . . d b c 
-                    . . . . . . d b c 
-                    . . . . . . d b c 
-                    . . . . . . d b c 
+                    d c . . . . . . . 
+                    d b c . . . . . . 
+                    . d b c c . . . . 
+                    . . d d b c . . . 
+                    . . . d b b c . . 
+                    . . . . d b c . . 
+                    . . . . d b c . . 
+                    . . . . d b c . . 
                     . . . . . d b c . 
-                    . . . d d b c c . 
-                    . d d b b c . . . 
-                    c b b c c . . . . 
-                    . c c . . . . . . 
-                    `, _player, 60, 0)
+                    . . . . . d b c . 
+                    . . . . . d b c . 
+                    . . . . d b c . . 
+                    . . . d b b c . . 
+                    . . d d b c . . . 
+                    . d b b c . . . . 
+                    d b c . . . . . . 
+                    `, _player, 6, 0)
                 bullet.setFlag(SpriteFlag.AutoDestroy, true)
-            })
+                timer.background(function () {
+                    pause(100)
+                    bullet = sprites.createProjectileFromSprite(img`
+                        . . . . . . . c . 
+                        . . . . . . d b c 
+                        . . . . . . d b c 
+                        . . . . . . d b c 
+                        . . . . . . d b c 
+                        . . . . . . d b c 
+                        . . . . . . d b c 
+                        . . . . . . d b c 
+                        . . . . . . d b c 
+                        . . . . . . d b c 
+                        . . . . . . d b c 
+                        . . . . . . d b c 
+                        . . . . . . d b c 
+                        . . . . . . d b c 
+                        . . . . . . d b c 
+                        . . . . . d b c . 
+                        . . . d d b c c . 
+                        . d d b b c . . . 
+                        c b b c c . . . . 
+                        . c c . . . . . . 
+                        `, _player, 60, 0)
+                    bullet.setFlag(SpriteFlag.AutoDestroy, true)
+                })
+            }
         }
     }
 })
