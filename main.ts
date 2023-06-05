@@ -772,7 +772,9 @@ game.onUpdate(function () {
                 _player.setImage(assets.image`moonAvatar`)
             }
         } else if (isLifesteal == 1) {
-            _player.setImage(assets.image`player_swordlifesteal`)
+            if (isMoonAvatar == 0) {
+                _player.setImage(assets.image`player_swordlifesteal`)
+            }
         }
     } else if (current_weapon == 0) {
         if (isSunAvatar == 0) {
@@ -1042,19 +1044,21 @@ game.onUpdateInterval(2000, function () {
                 ammopowerup.setPosition(155, randint(0, 120))
                 ammopowerup.setVelocity(-50, 0)
             } else if (current_weapon == 1) {
-                ammopowerup = sprites.create(img`
-                    . . . 1 . . 
-                    . . 1 4 b . 
-                    . 1 4 2 b . 
-                    . 1 4 2 b . 
-                    1 4 2 2 2 b 
-                    1 4 2 2 2 b 
-                    . 1 2 2 2 b 
-                    . . b b b . 
-                    `, SpriteKind.lifestealdrop)
-                ammopowerup.setFlag(SpriteFlag.AutoDestroy, true)
-                ammopowerup.setPosition(155, randint(0, 120))
-                ammopowerup.setVelocity(-50, 0)
+                if (isMoonAvatar == 0) {
+                    ammopowerup = sprites.create(img`
+                        . . . 1 . . 
+                        . . 1 4 b . 
+                        . 1 4 2 b . 
+                        . 1 4 2 b . 
+                        1 4 2 2 2 b 
+                        1 4 2 2 2 b 
+                        . 1 2 2 2 b 
+                        . . b b b . 
+                        `, SpriteKind.lifestealdrop)
+                    ammopowerup.setFlag(SpriteFlag.AutoDestroy, true)
+                    ammopowerup.setPosition(155, randint(0, 120))
+                    ammopowerup.setVelocity(-50, 0)
+                }
             }
         }
     }
@@ -1209,7 +1213,7 @@ game.onUpdateInterval(2000, function () {
 })
 game.onUpdateInterval(1000, function () {
     if (moonAvatarRng == 0) {
-        moonAvatarRng = randint(1, 1)
+        moonAvatarRng = randint(1, 1000)
         if (moonAvatarRng == 1) {
             isMoonAvatar = 1
             playerbar.max = 60
@@ -1249,24 +1253,26 @@ game.onUpdateInterval(1500, function () {
 game.onUpdateInterval(450, function () {
     if (current_weapon == 1) {
         if (isLifesteal == 1) {
-            timer.background(function () {
-                bullet = sprites.createProjectileFromSprite(img`
-                    . . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . 2 2 
-                    . . . . . . . . . . . . . . . . 4 4 2 
-                    . . . . . . . . . . . . . . . . 4 2 2 
-                    . . . . . . . . . . . . . . 4 4 4 2 . 
-                    . . . . . . . . . . 4 4 4 4 4 2 2 2 . 
-                    . . . . 4 4 4 4 4 4 4 2 2 2 2 2 . . . 
-                    . . . . 2 2 2 2 2 2 2 2 . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . . 
-                    . . . . . . . . . . . . . . . . . . . 
-                    `, _player, 46, 0)
-                bullet.setFlag(SpriteFlag.AutoDestroy, true)
-            })
-            timer.after(150, function () {
-                sprites.destroy(bullet)
-            })
+            if (isMoonAvatar == 0) {
+                timer.background(function () {
+                    bullet = sprites.createProjectileFromSprite(img`
+                        . . . . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . . 2 2 
+                        . . . . . . . . . . . . . . . . 4 4 2 
+                        . . . . . . . . . . . . . . . . 4 2 2 
+                        . . . . . . . . . . . . . . 4 4 4 2 . 
+                        . . . . . . . . . . 4 4 4 4 4 2 2 2 . 
+                        . . . . 4 4 4 4 4 4 4 2 2 2 2 2 . . . 
+                        . . . . 2 2 2 2 2 2 2 2 . . . . . . . 
+                        . . . . . . . . . . . . . . . . . . . 
+                        . . . . . . . . . . . . . . . . . . . 
+                        `, _player, 46, 0)
+                    bullet.setFlag(SpriteFlag.AutoDestroy, true)
+                })
+                timer.after(150, function () {
+                    sprites.destroy(bullet)
+                })
+            }
         } else if (isLifesteal == 0) {
             if (isMoonAvatar == 0) {
                 bullet = sprites.createProjectileFromSprite(img`
