@@ -368,7 +368,7 @@ eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
             case "image12":
             case "moonAvatar":return img`
 ...........c.....
-..c.......b.....b
+..c....3..b.....b
 ..c.dddd..b..cc.b
 ....ddc...b.c1dcb
 ..d.ddc.....cddcb
