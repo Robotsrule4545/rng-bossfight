@@ -984,6 +984,11 @@ game.onUpdateInterval(5000, function () {
     }
 })
 game.onUpdateInterval(5000, function () {
+    for (let value of sprites.allOfKind(SpriteKind.casing)) {
+        sprites.destroy(value)
+    }
+})
+game.onUpdateInterval(5000, function () {
     if (bossAlive == 1 && playerbar.value < 10) {
         medpack = sprites.create(img`
             . 1 1 1 1 1 1 1 1 . 
@@ -1216,8 +1221,8 @@ game.onUpdateInterval(1500, function () {
                 2 2 1 
                 `, SpriteKind.casing)
             casing.setPosition(_player.x, _player.y)
-            casing.setVelocity(0, 30)
-            casing.setFlag(SpriteFlag.AutoDestroy, true)
+            casing.setVelocity(0, 50)
+            casing.setFlag(SpriteFlag.StayInScreen, true)
         }
     }
 })
