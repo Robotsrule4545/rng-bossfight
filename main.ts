@@ -534,9 +534,16 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.medpack, function (sprite, other
     sprites.destroy(otherSprite)
     playerbar.value += 1
     timer.background(function () {
-        for (let index = 0; index < 3; index++) {
-            pause(1000)
-            playerbar.value += 2
+        if (isMoonAvatar == 1) {
+            for (let index = 0; index < 3; index++) {
+                pause(1000)
+                playerbar.value += 10
+            }
+        } else {
+            for (let index = 0; index < 3; index++) {
+                pause(1000)
+                playerbar.value += 2
+            }
         }
     })
 })
@@ -785,7 +792,7 @@ game.onUpdate(function () {
     }
 })
 game.onUpdate(function () {
-    if (bossShards >= 10 && info.score() >= 10) {
+    if (bossShards >= 6 && info.score() >= 10) {
         bossShards = 0
         bossFight()
     }
